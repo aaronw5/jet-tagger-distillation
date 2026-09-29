@@ -66,11 +66,11 @@ Quantities:
   Q.z_7                    pT of particle 7 / total pT
   Q.z_top3_slots           pT share of the 3 hardest particles
   Q.sj2_zsoft              pT share of the softer of the 2 N-subjettiness subjets
-  Q.zdr_0                  pT share × ΔR of particle 0 (its part of the girth)
-  Q.zdr_1                  pT share × ΔR of particle 1 (its part of the girth)
-  Q.zdr_2                  pT share × ΔR of particle 2 (its part of the girth)
-  Q.zdr_5                  pT share × ΔR of particle 5 (its part of the girth)
-  Q.zdr_6                  pT share × ΔR of particle 6 (its part of the girth)
+  Q.zdr_0                  pT share × ΔR of particle 0 (its part of the sum_z_dr)
+  Q.zdr_1                  pT share × ΔR of particle 1 (its part of the sum_z_dr)
+  Q.zdr_2                  pT share × ΔR of particle 2 (its part of the sum_z_dr)
+  Q.zdr_5                  pT share × ΔR of particle 5 (its part of the sum_z_dr)
+  Q.zdr_6                  pT share × ΔR of particle 6 (its part of the sum_z_dr)
   Q.pt1_dr01               pT1 · ΔR01
   Q.planar_flow            planar flow of the pT-weighted (Δη, Δφ) tensor
   Q.sj3_dr_min             smallest distance among the 3 subjet axes
@@ -88,9 +88,9 @@ Quantities:
   Q.phi_0                  Δφ of particle 0
   Q.sum_pt_top3            total pT of the 3 hardest particles [GeV]
   Q.sum_pt_top5            total pT of the 5 hardest particles [GeV]
-  Q.girth2_top2            pT-weighted mean ΔR² of the 2 hardest particles
-  Q.girth2_top3            pT-weighted mean ΔR² of the 3 hardest particles
-  Q.girth2_top5            pT-weighted mean ΔR² of the 5 hardest particles
+  Q.sum_z_dr2_top2            pT-weighted mean ΔR² of the 2 hardest particles
+  Q.sum_z_dr2_top3            pT-weighted mean ΔR² of the 3 hardest particles
+  Q.sum_z_dr2_top5            pT-weighted mean ΔR² of the 5 hardest particles
   Q.n_dr_0_0p05            number of particles with 0 ≤ ΔR < 0.05
   Q.n_dr_0p05_0p1          number of particles with 0.05 ≤ ΔR < 0.1
   Q.n_dr_0p1_0p2           number of particles with 0.1 ≤ ΔR < 0.2
@@ -101,7 +101,7 @@ Quantities:
   Q.z_dr_0p05_0p1          pT share of the particles with 0.05 ≤ ΔR < 0.1
   Q.z_dr_0p1_0p2           pT share of the particles with 0.1 ≤ ΔR < 0.2
   Q.z_dr_0p2_0p4           pT share of the particles with 0.2 ≤ ΔR < 0.4
-  Q.girth                  pT-weighted mean ΔR
+  Q.sum_z_dr                  pT-weighted mean ΔR
   Q.mean_eta               pT-weighted mean Δη
   Q.mean_eta2              pT-weighted mean Δη²
   Q.mean_phi               pT-weighted mean Δφ
@@ -334,9 +334,9 @@ def quantities(pt, eta, phi):
         phi_0=phi[0],
         sum_pt_top3=sum(pt[:3]),
         sum_pt_top5=sum(pt[:5]),
-        girth2_top2=sum(pt[i] * dr[i] ** 2 for i in range(2)) / max(sum(pt[:2]), 1e-9),
-        girth2_top3=sum(pt[i] * dr[i] ** 2 for i in range(3)) / max(sum(pt[:3]), 1e-9),
-        girth2_top5=sum(pt[i] * dr[i] ** 2 for i in range(5)) / max(sum(pt[:5]), 1e-9),
+        sum_z_dr2_top2=sum(pt[i] * dr[i] ** 2 for i in range(2)) / max(sum(pt[:2]), 1e-9),
+        sum_z_dr2_top3=sum(pt[i] * dr[i] ** 2 for i in range(3)) / max(sum(pt[:3]), 1e-9),
+        sum_z_dr2_top5=sum(pt[i] * dr[i] ** 2 for i in range(5)) / max(sum(pt[:5]), 1e-9),
         n_dr_0_0p05=sum(1 for i in real if 0 <= dr[i] < 0.05),
         n_dr_0p05_0p1=sum(1 for i in real if 0.05 <= dr[i] < 0.1),
         n_dr_0p1_0p2=sum(1 for i in real if 0.1 <= dr[i] < 0.2),
@@ -347,7 +347,7 @@ def quantities(pt, eta, phi):
         z_dr_0p05_0p1=sum(z[i] for i in real if 0.05 <= dr[i] < 0.1),
         z_dr_0p1_0p2=sum(z[i] for i in real if 0.1 <= dr[i] < 0.2),
         z_dr_0p2_0p4=sum(z[i] for i in real if 0.2 <= dr[i] < 0.4),
-        girth=sum(z[i] * dr[i] for i in P),
+        sum_z_dr=sum(z[i] * dr[i] for i in P),
         mean_eta=sum(z[i] * eta[i] for i in P),
         mean_eta2=sum(z[i] * eta[i] ** 2 for i in P),
         mean_phi=sum(z[i] * phi[i] for i in P),
@@ -377,13 +377,13 @@ def neuron_0(Q):
         - 0.03596222 * max(0.0, 0.00391 - Q.lam1) / 0.001379493   # -3.6%  lam1 < 0.00391
         - 0.03356909 * max(0.0, Q.centroid_offset - 0.00875) / 0.01011021   # -3.4%  centroid_offset > 0.00875
         - 0.02819669 * max(0.0, 0.0363 - Q.C2) / 0.01543467   # -2.8%  C2 < 0.0363
-        - 0.02705474 * max(0.0, Q.girth - 0.0816) / 0.00909826   # -2.7%  girth > 0.0816
+        - 0.02705474 * max(0.0, Q.sum_z_dr - 0.0816) / 0.00909826   # -2.7%  sum_z_dr > 0.0816
         + 0.02563569 * max(0.0, 875.0 - Q.sum_pt) * max(0.0, Q.centroid_offset - 0.0158) / 1.941913   # +2.6%  sum_pt < 875 and centroid_offset > 0.0158
         - 0.02418947 * Q.lam2 / 0.0005288738   # -2.4%  lam2
         + 0.01564562 * max(0.0, 0.106 - Q.planar_flow) / 0.03095804   # +1.6%  planar_flow < 0.106
         + 0.01395914 * max(0.0, 0.00567 - Q.lam1) * max(0.0, 725.0 - Q.sum_pt) / 0.1046836   # +1.4%  lam1 < 0.00567 and sum_pt < 725
         - 0.01224445 * max(0.0, 0.0172 - Q.lam1) * max(0.0, Q.centroid_offset - 0.0179) / 3.725137e-05   # -1.2%  lam1 < 0.0172 and centroid_offset > 0.0179
-        - 0.00968222 * max(0.0, 0.00764 - Q.girth2_top3) * max(0.0, 0.0325 - Q.phi_0) / 0.0001455105   # -1.0%  girth2_top3 < 0.00764 and phi_0 < 0.0325
+        - 0.00968222 * max(0.0, 0.00764 - Q.sum_z_dr2_top3) * max(0.0, 0.0325 - Q.phi_0) / 0.0001455105   # -1.0%  sum_z_dr2_top3 < 0.00764 and phi_0 < 0.0325
         - 0.00786464 * max(0.0, Q.n_dr_0p2_0p4 - 0.397) / 0.2693113   # -0.8%  n_dr_0p2_0p4 > 0.397
         - 0.007105084 * max(0.0, 0.00554 - Q.lam1) * max(0.0, 1.33 - Q.D2) / 0.0001846899   # -0.7%  lam1 < 0.00554 and D2 < 1.33
         - 0.005887729 * max(0.0, Q.centroid_offset - 0.0261) / 0.003409557   # -0.6%  centroid_offset > 0.0261
@@ -399,18 +399,18 @@ def neuron_1(Q):
     z = 18.56884 * (0.2003356
         - 0.1374055 * max(0.0, 726.0 - Q.sum_pt_top5) / 159.4663   # -13.7%  sum_pt_top5 < 726
         - 0.08259302 * max(0.0, 0.00892 - Q.lam1) * max(0.0, 0.000937 - Q.lam2) / 4.025346e-06   # -8.3%  lam1 < 0.00892 and lam2 < 0.000937
-        - 0.07275449 * max(0.0, 0.107 - Q.girth) / 0.05297908   # -7.3%  girth < 0.107
+        - 0.07275449 * max(0.0, 0.107 - Q.sum_z_dr) / 0.05297908   # -7.3%  sum_z_dr < 0.107
         - 0.05828546 * max(0.0, 0.0629 - Q.z_7) / 0.01505276   # -5.8%  z_7 < 0.0629
-        + 0.05556478 * max(0.0, 0.0635 - Q.girth) / 0.02003444   # +5.6%  girth < 0.0635
+        + 0.05556478 * max(0.0, 0.0635 - Q.sum_z_dr) / 0.02003444   # +5.6%  sum_z_dr < 0.0635
         + 0.04866818 * max(0.0, 6.56 - Q.log_sum_pt) / 0.1099406   # +4.9%  log_sum_pt < 6.56
         + 0.04755422 * Q.z_5 / 0.07008149   # +4.8%  z_5
         + 0.04594812 * max(0.0, 0.1 - Q.tau1) / 0.0461191   # +4.6%  tau1 < 0.1
-        - 0.03877499 * max(0.0, Q.log_sum_pt - 6.58) * max(0.0, 0.00794 - Q.girth2_top3) / 0.000521744   # -3.9%  log_sum_pt > 6.58 and girth2_top3 < 0.00794
-        + 0.03776522 * max(0.0, 0.0655 - Q.z_7) * max(0.0, 0.00859 - Q.girth2_top3) / 0.0001057702   # +3.8%  z_7 < 0.0655 and girth2_top3 < 0.00859
+        - 0.03877499 * max(0.0, Q.log_sum_pt - 6.58) * max(0.0, 0.00794 - Q.sum_z_dr2_top3) / 0.000521744   # -3.9%  log_sum_pt > 6.58 and sum_z_dr2_top3 < 0.00794
+        + 0.03776522 * max(0.0, 0.0655 - Q.z_7) * max(0.0, 0.00859 - Q.sum_z_dr2_top3) / 0.0001057702   # +3.8%  z_7 < 0.0655 and sum_z_dr2_top3 < 0.00859
         + 0.03077597 * max(0.0, Q.log_sum_pt - 6.72) / 0.02992011   # +3.1%  log_sum_pt > 6.72
         - 0.02891738 * max(0.0, 0.00537 - Q.lam1) / 0.002156475   # -2.9%  lam1 < 0.00537
         - 0.02885737 * max(0.0, Q.sum_pt - 839.0) / 24.69345   # -2.9%  sum_pt > 839
-        - 0.02480638 * max(0.0, Q.log_sum_pt - 6.32) * max(0.0, 0.00352 - Q.girth2_top2) / 0.0005406406   # -2.5%  log_sum_pt > 6.32 and girth2_top2 < 0.00352
+        - 0.02480638 * max(0.0, Q.log_sum_pt - 6.32) * max(0.0, 0.00352 - Q.sum_z_dr2_top2) / 0.0005406406   # -2.5%  log_sum_pt > 6.32 and sum_z_dr2_top2 < 0.00352
         + 0.02275851 * max(0.0, Q.sum_pt_top5 - 733.0) / 25.30534   # +2.3%  sum_pt_top5 > 733
         + 0.02116311 * max(0.0, 0.00117 - Q.lam2) / 0.0009492135   # +2.1%  lam2 < 0.00117
         - 0.01983185 * max(0.0, 556.0 - Q.sum_pt_top5) / 54.47551   # -2.0%  sum_pt_top5 < 556
@@ -426,7 +426,7 @@ def neuron_1(Q):
         + 0.01106865 * max(0.0, Q.pt_6 - 37.0) / 6.760919   # +1.1%  pt_6 > 37
         - 0.01021746 * max(0.0, 6.21 - Q.log_sum_pt) / 0.01567986   # -1.0%  log_sum_pt < 6.21
         - 0.009488297 * max(0.0, 0.0196 - Q.centroid_offset) / 0.007529346   # -0.9%  centroid_offset < 0.0196
-        + 0.00889407 * max(0.0, 0.0507 - Q.z_6) * max(0.0, 0.00348 - Q.girth2_top2) / 1.35371e-05   # +0.9%  z_6 < 0.0507 and girth2_top2 < 0.00348
+        + 0.00889407 * max(0.0, 0.0507 - Q.z_6) * max(0.0, 0.00348 - Q.sum_z_dr2_top2) / 1.35371e-05   # +0.9%  z_6 < 0.0507 and sum_z_dr2_top2 < 0.00348
         + 0.008046639 * max(0.0, Q.pt_7 - 42.0) / 1.766156   # +0.8%  pt_7 > 42
         + 0.004825833 * max(0.0, 0.00913 - Q.lam1) * max(0.0, Q.centroid_offset - 0.0198) / 9.719103e-06   # +0.5%  lam1 < 0.00913 and centroid_offset > 0.0198
         - 0.004145437 * max(0.0, 0.000662 - Q.lam1) / 0.0001282933   # -0.4%  lam1 < 0.000662
@@ -454,7 +454,7 @@ def neuron_2(Q):
         - 0.01648073 * max(0.0, 0.00752 - Q.lam1) * max(0.0, 62.6 - Q.pt_6) / 0.08423953   # -1.6%  lam1 < 0.00752 and pt_6 < 62.6
         + 0.01346849 * max(0.0, Q.log_sum_pt - 6.9) * max(0.0, 0.107 - Q.absphi_0) / 0.0003716173   # +1.3%  log_sum_pt > 6.9 and absphi_0 < 0.107
         - 0.009669651 * max(0.0, Q.sum_pt - 988.0) * max(0.0, 0.104 - Q.absphi_0) / 0.4138634   # -1.0%  sum_pt > 988 and absphi_0 < 0.104
-        - 0.008930076 * max(0.0, 0.116 - Q.girth) * max(0.0, Q.centroid_offset - 0.0173) / 0.0001580243   # -0.9%  girth < 0.116 and centroid_offset > 0.0173
+        - 0.008930076 * max(0.0, 0.116 - Q.sum_z_dr) * max(0.0, Q.centroid_offset - 0.0173) / 0.0001580243   # -0.9%  sum_z_dr < 0.116 and centroid_offset > 0.0173
         + 0.007563324 * max(0.0, Q.sum_pt - 867.0) * max(0.0, 4.31 - Q.D2_b2) / 40.10165   # +0.8%  sum_pt > 867 and D2_b2 < 4.31
         - 0.004332618 * max(0.0, 6.7 - Q.log_sum_pt) * max(0.0, 9.61e-05 - Q.mean_phi2) / 6.095556e-07   # -0.4%  log_sum_pt < 6.7 and mean_phi2 < 9.61e-05
         - 0.002734446 * max(0.0, Q.log_sum_pt - 6.91) * max(0.0, 4.72 - Q.D2_b2) / 0.008520966   # -0.3%  log_sum_pt > 6.91 and D2_b2 < 4.72
@@ -467,7 +467,7 @@ def neuron_2(Q):
 def neuron_3(Q):
     # scale S = 8.922;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 8.921586 * (-0.09392949
-        - 0.1836893 * max(0.0, 0.0767 - Q.girth) / 0.02840207   # -18.4%  girth < 0.0767
+        - 0.1836893 * max(0.0, 0.0767 - Q.sum_z_dr) / 0.02840207   # -18.4%  sum_z_dr < 0.0767
         + 0.1069017 * max(0.0, Q.lam1 - 0.00541) / 0.002686571   # +10.7%  lam1 > 0.00541
         + 0.0764092 * max(0.0, Q.sj3_dr_max - 0.185) / 0.04057686   # +7.6%  sj3_dr_max > 0.185
         - 0.06550537 * max(0.0, Q.lam1 - 0.0109) / 0.001398114   # -6.6%  lam1 > 0.0109
@@ -484,12 +484,12 @@ def neuron_3(Q):
         + 0.02620725 * max(0.0, Q.planar_flow - 0.0924) / 0.2145048   # +2.6%  planar_flow > 0.0924
         - 0.0243638 * max(0.0, Q.sj2_dr - 0.228) / 0.01598263   # -2.4%  sj2_dr > 0.228
         - 0.0215976 * max(0.0, Q.sj2_dr - 0.148) * max(0.0, Q.log_sum_pt - 6.11) / 0.01566544   # -2.2%  sj2_dr > 0.148 and log_sum_pt > 6.11
-        - 0.02086998 * max(0.0, Q.girth - 0.11) * max(0.0, Q.eccentricity - 0.686) / 0.0007538191   # -2.1%  girth > 0.11 and eccentricity > 0.686
+        - 0.02086998 * max(0.0, Q.sum_z_dr - 0.11) * max(0.0, Q.eccentricity - 0.686) / 0.0007538191   # -2.1%  sum_z_dr > 0.11 and eccentricity > 0.686
         + 0.02013657 * max(0.0, Q.tau1 - 0.0939) / 0.01095428   # +2.0%  tau1 > 0.0939
-        - 0.01680117 * max(0.0, Q.girth - 0.0444) * max(0.0, Q.n_pt_above_50 - 2.21) / 0.0660322   # -1.7%  girth > 0.0444 and n_pt_above_50 > 2.21
+        - 0.01680117 * max(0.0, Q.sum_z_dr - 0.0444) * max(0.0, Q.n_pt_above_50 - 2.21) / 0.0660322   # -1.7%  sum_z_dr > 0.0444 and n_pt_above_50 > 2.21
         - 0.01344003 * max(0.0, 1.23 - Q.N3) * max(0.0, Q.log_sum_pt - 6.1) / 0.01600886   # -1.3%  N3 < 1.23 and log_sum_pt > 6.1
         + 0.007140712 * max(0.0, 1.22 - Q.N3) * max(0.0, 0.0817 - Q.z_7) / 0.001034196   # +0.7%  N3 < 1.22 and z_7 < 0.0817
-        + 0.006167232 * max(0.0, Q.girth - 0.132) / 0.001965053   # +0.6%  girth > 0.132
+        + 0.006167232 * max(0.0, Q.sum_z_dr - 0.132) / 0.001965053   # +0.6%  sum_z_dr > 0.132
     )
     return max(0.0, z)
 
@@ -502,7 +502,7 @@ def neuron_4(Q):
         - 0.127612 * max(0.0, 0.00827 - Q.lam1) / 0.004215706   # -12.8%  lam1 < 0.00827
         + 0.08923701 * max(0.0, 0.00345 - Q.lam2) / 0.003076147   # +8.9%  lam2 < 0.00345
         + 0.07959985 * max(0.0, 0.247 - Q.max_dr) / 0.1282735   # +8.0%  max_dr < 0.247
-        + 0.05872462 * max(0.0, 0.0761 - Q.girth) / 0.02798058   # +5.9%  girth < 0.0761
+        + 0.05872462 * max(0.0, 0.0761 - Q.sum_z_dr) / 0.02798058   # +5.9%  sum_z_dr < 0.0761
         + 0.05109303 * max(0.0, Q.max_dr - 0.113) / 0.0397147   # +5.1%  max_dr > 0.113
         - 0.02664002 * max(0.0, 0.00593 - Q.lam1) / 0.002502545   # -2.7%  lam1 < 0.00593
         - 0.02488301 * max(0.0, 0.142 - Q.sj3_dr_max) / 0.03694464   # -2.5%  sj3_dr_max < 0.142
@@ -510,7 +510,7 @@ def neuron_4(Q):
         + 0.01937966 * max(0.0, 0.0343 - Q.C2) / 0.01394294   # +1.9%  C2 < 0.0343
         - 0.01850467 * max(0.0, 0.000416 - Q.lam2) / 0.0002888069   # -1.9%  lam2 < 0.000416
         + 0.0180903 * max(0.0, Q.planar_flow - 0.0231) / 0.2607792   # +1.8%  planar_flow > 0.0231
-        - 0.01752151 * max(0.0, 0.0149 - Q.girth) / 0.001335759   # -1.8%  girth < 0.0149
+        - 0.01752151 * max(0.0, 0.0149 - Q.sum_z_dr) / 0.001335759   # -1.8%  sum_z_dr < 0.0149
         - 0.01546288 * max(0.0, Q.sj2_dr - 0.163) / 0.03737718   # -1.5%  sj2_dr > 0.163
         + 0.015225 * max(0.0, Q.sum_pt - 722.0) / 67.28601   # +1.5%  sum_pt > 722
         + 0.01365547 * max(0.0, 0.564 - Q.pt_dispersion) / 0.1282785   # +1.4%  pt_dispersion < 0.564
@@ -553,7 +553,7 @@ def neuron_5(Q):
         + 0.0634162 * max(0.0, 0.0537 - Q.z_6) * max(0.0, 36.2 - Q.pt1_dr01) / 0.2089585   # +6.3%  z_6 < 0.0537 and pt1_dr01 < 36.2
         + 0.05973196 * max(0.0, 0.0295 - Q.z_7) / 0.001531694   # +6.0%  z_7 < 0.0295
         - 0.03851433 * max(0.0, 0.177 - Q.LHA) * max(0.0, 6.86 - Q.log_sum_pt) / 0.002605623   # -3.9%  LHA < 0.177 and log_sum_pt < 6.86
-        + 0.02264714 * max(0.0, 0.0114 - Q.girth) * max(0.0, Q.sum_pt_top5 - 598.0) / 0.1469617   # +2.3%  girth < 0.0114 and sum_pt_top5 > 598
+        + 0.02264714 * max(0.0, 0.0114 - Q.sum_z_dr) * max(0.0, Q.sum_pt_top5 - 598.0) / 0.1469617   # +2.3%  sum_z_dr < 0.0114 and sum_pt_top5 > 598
         - 0.01840206 * max(0.0, Q.log_sum_pt - 6.83) * max(0.0, 3.49e-05 - Q.e3) / 2.840444e-07   # -1.8%  log_sum_pt > 6.83 and e3 < 3.49e-05
         + 0.01341161 * max(0.0, 673.0 - Q.sum_pt) * max(0.0, 0.00688 - Q.mean_eta2) / 0.1627671   # +1.3%  sum_pt < 673 and mean_eta2 < 0.00688
         - 0.005586022 * max(0.0, Q.log_sum_pt - 6.91) * max(0.0, 0.0118 - Q.zdr_0) / 2.283022e-05   # -0.6%  log_sum_pt > 6.91 and zdr_0 < 0.0118
@@ -565,10 +565,10 @@ def neuron_6(Q):
     # scale S = 25.78;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 25.77548 * (-0.009039599
         + 0.1368802 * max(0.0, 0.321 - Q.LHA) / 0.09164031   # +13.7%  LHA < 0.321
-        - 0.1158489 * max(0.0, 0.0575 - Q.girth) / 0.01677562   # -11.6%  girth < 0.0575
+        - 0.1158489 * max(0.0, 0.0575 - Q.sum_z_dr) / 0.01677562   # -11.6%  sum_z_dr < 0.0575
         + 0.1054576 * max(0.0, Q.LHA - 0.257) / 0.03653523   # +10.5%  LHA > 0.257
         - 0.1048325 * max(0.0, Q.LHA - 0.141) / 0.1111978   # -10.5%  LHA > 0.141
-        - 0.09731456 * max(0.0, 0.0816 - Q.girth) / 0.031994   # -9.7%  girth < 0.0816
+        - 0.09731456 * max(0.0, 0.0816 - Q.sum_z_dr) / 0.031994   # -9.7%  sum_z_dr < 0.0816
         + 0.0703232 * max(0.0, 0.00398 - Q.lam2) / 0.003582241   # +7.0%  lam2 < 0.00398
         + 0.05007125 * max(0.0, 0.185 - Q.sj3_dr_max) / 0.05736046   # +5.0%  sj3_dr_max < 0.185
         - 0.04942657 * max(0.0, 0.17 - Q.max_dr) / 0.06499968   # -4.9%  max_dr < 0.17
@@ -576,7 +576,7 @@ def neuron_6(Q):
         + 0.03534575 * max(0.0, 6.62 - Q.log_sum_pt) / 0.141688   # +3.5%  log_sum_pt < 6.62
         - 0.03500517 * max(0.0, Q.z_7 - 0.0388) / 0.01696006   # -3.5%  z_7 > 0.0388
         - 0.02437407 * max(0.0, Q.tau1 - 0.0615) / 0.02292896   # -2.4%  tau1 > 0.0615
-        - 0.0240846 * max(0.0, Q.girth - 0.0957) / 0.006360575   # -2.4%  girth > 0.0957
+        - 0.0240846 * max(0.0, Q.sum_z_dr - 0.0957) / 0.006360575   # -2.4%  sum_z_dr > 0.0957
         + 0.02047931 * max(0.0, Q.pt_7 - 28.5) / 8.171268   # +2.0%  pt_7 > 28.5
         - 0.0163465 * max(0.0, Q.eccentricity - 0.864) / 0.07417938   # -1.6%  eccentricity > 0.864
         + 0.01186594 * max(0.0, Q.sj2_dr - 0.16) * max(0.0, 0.108 - Q.C2) / 0.002025498   # +1.2%  sj2_dr > 0.16 and C2 < 0.108
@@ -602,23 +602,23 @@ def neuron_7(Q):
     # scale S = 27.41;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 27.41343 * (0.02309087
         - 0.09064117 * max(0.0, Q.lam1 - 0.00734) / 0.002070655   # -9.1%  lam1 > 0.00734
-        - 0.07538595 * max(0.0, Q.girth - 0.0818) * max(0.0, 2.88 - Q.D2) / 0.01828839   # -7.5%  girth > 0.0818 and D2 < 2.88
+        - 0.07538595 * max(0.0, Q.sum_z_dr - 0.0818) * max(0.0, 2.88 - Q.D2) / 0.01828839   # -7.5%  sum_z_dr > 0.0818 and D2 < 2.88
         + 0.06729572 * max(0.0, 0.0848 - Q.tau1) / 0.03507237   # +6.7%  tau1 < 0.0848
         + 0.06372948 * max(0.0, 0.0511 - Q.centroid_offset) / 0.03466357   # +6.4%  centroid_offset < 0.0511
         + 0.06260191 * max(0.0, Q.LHA - 0.317) / 0.01430111   # +6.3%  LHA > 0.317
-        - 0.05895485 * max(0.0, Q.girth - 0.0886) / 0.007587581   # -5.9%  girth > 0.0886
+        - 0.05895485 * max(0.0, Q.sum_z_dr - 0.0886) / 0.007587581   # -5.9%  sum_z_dr > 0.0886
         + 0.05790293 * max(0.0, Q.tau1 - 0.0573) / 0.02491865   # +5.8%  tau1 > 0.0573
         - 0.05539297 * max(0.0, 0.00461 - Q.lam1) / 0.001731484   # -5.5%  lam1 < 0.00461
         + 0.05024865 * max(0.0, Q.lam1 - 0.00798) * max(0.0, 100.0 - Q.pt_4) / 0.09434849   # +5.0%  lam1 > 0.00798 and pt_4 < 100
         + 0.04845266 * max(0.0, Q.lam1 - 0.00309) * max(0.0, 0.252 - Q.planar_flow) / 0.0004743763   # +4.8%  lam1 > 0.00309 and planar_flow < 0.252
         - 0.04710018 * max(0.0, 0.0315 - Q.centroid_offset) * max(0.0, 1.14 - Q.n_dr_0p2_0p4) / 0.017034   # -4.7%  centroid_offset < 0.0315 and n_dr_0p2_0p4 < 1.14
         + 0.03909928 * max(0.0, 0.165 - Q.sj3_dr_max) / 0.04680547   # +3.9%  sj3_dr_max < 0.165
-        - 0.03759015 * max(0.0, 0.0556 - Q.girth) / 0.01580483   # -3.8%  girth < 0.0556
+        - 0.03759015 * max(0.0, 0.0556 - Q.sum_z_dr) / 0.01580483   # -3.8%  sum_z_dr < 0.0556
         + 0.03267319 * max(0.0, 1.0 - Q.n_dr_0p2_0p4) / 0.8069227   # +3.3%  n_dr_0p2_0p4 < 1
         - 0.03266673 * max(0.0, Q.lam1 - 0.00308) * max(0.0, Q.D2 - -0.125) / 0.003778511   # -3.3%  lam1 > 0.00308 and D2 > -0.125
         + 0.03111078 * max(0.0, Q.tau1 - 0.103) / 0.008874644   # +3.1%  tau1 > 0.103
         - 0.02204747 * max(0.0, 0.262 - Q.planar_flow) * max(0.0, Q.lam1 - 0.008) / 0.0002048803   # -2.2%  planar_flow < 0.262 and lam1 > 0.008
-        + 0.01793587 * max(0.0, Q.girth - 0.128) / 0.002308375   # +1.8%  girth > 0.128
+        + 0.01793587 * max(0.0, Q.sum_z_dr - 0.128) / 0.002308375   # +1.8%  sum_z_dr > 0.128
         - 0.01683022 * max(0.0, 0.000344 - Q.lam2) / 0.0002295393   # -1.7%  lam2 < 0.000344
         - 0.01444997 * max(0.0, 0.0954 - Q.max_dr) / 0.0209589   # -1.4%  max_dr < 0.0954
         - 0.01146827 * max(0.0, Q.lam2 - 0.0011) / 0.0003150146   # -1.1%  lam2 > 0.0011
@@ -626,7 +626,7 @@ def neuron_7(Q):
         - 0.009658084 * max(0.0, 0.000137 - Q.e3) * max(0.0, 37.3 - Q.pt_7) / 0.0006602524   # -1.0%  e3 < 0.000137 and pt_7 < 37.3
         + 0.008305807 * max(0.0, 0.197 - Q.planar_flow) * max(0.0, Q.log_sum_pt - 6.46) / 0.01198372   # +0.8%  planar_flow < 0.197 and log_sum_pt > 6.46
         - 0.007148017 * max(0.0, Q.lam1 - 0.00186) * max(0.0, 0.191 - Q.sj3_dr_max) / 2.007702e-05   # -0.7%  lam1 > 0.00186 and sj3_dr_max < 0.191
-        + 0.00696603 * max(0.0, Q.girth2_top3 - 0.0111) / 0.001491897   # +0.7%  girth2_top3 > 0.0111
+        + 0.00696603 * max(0.0, Q.sum_z_dr2_top3 - 0.0111) / 0.001491897   # +0.7%  sum_z_dr2_top3 > 0.0111
         - 0.006543302 * max(0.0, Q.sj3_dr_max - 0.225) / 0.02734365   # -0.7%  sj3_dr_max > 0.225
         - 0.006145656 * max(0.0, 0.188 - Q.planar_flow) * max(0.0, 0.237 - Q.max_dr) / 0.00682079   # -0.6%  planar_flow < 0.188 and max_dr < 0.237
         - 0.003558464 * max(0.0, Q.n_dr_0p2_0p4 - 1.04) / 0.1491586   # -0.4%  n_dr_0p2_0p4 > 1.04
@@ -642,7 +642,7 @@ def neuron_7(Q):
 def neuron_8(Q):
     # scale S = 29.58;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 29.57579 * (0.09196711
-        - 0.1386574 * max(0.0, Q.girth - 0.0218) / 0.03981459   # -13.9%  girth > 0.0218
+        - 0.1386574 * max(0.0, Q.sum_z_dr - 0.0218) / 0.03981459   # -13.9%  sum_z_dr > 0.0218
         + 0.07117826 * max(0.0, Q.LHA - 0.154) / 0.1012093   # +7.1%  LHA > 0.154
         + 0.05871978 * max(0.0, Q.lam1 - 0.0045) / 0.003090185   # +5.9%  lam1 > 0.0045
         - 0.04816042 * max(0.0, Q.sum_pt - 714.0) / 71.21911   # -4.8%  sum_pt > 714
@@ -651,13 +651,13 @@ def neuron_8(Q):
         + 0.04099681 * max(0.0, 0.0073 - Q.lam1) / 0.003464323   # +4.1%  lam1 < 0.0073
         - 0.03991965 * max(0.0, Q.lam1 - 0.00773) / 0.001977647   # -4.0%  lam1 > 0.00773
         - 0.0398444 * max(0.0, 0.016 - Q.lam1) / 0.01081128   # -4.0%  lam1 < 0.016
-        + 0.02812863 * max(0.0, Q.girth - 0.0828) / 0.008812779   # +2.8%  girth > 0.0828
+        + 0.02812863 * max(0.0, Q.sum_z_dr - 0.0828) / 0.008812779   # +2.8%  sum_z_dr > 0.0828
         - 0.02051271 * max(0.0, 6.73 - Q.log_sum_pt) / 0.2143744   # -2.1%  log_sum_pt < 6.73
-        + 0.0191259 * max(0.0, 0.16 - Q.sj3_dr_max) * max(0.0, 0.0018 - Q.girth2_top2) / 6.264269e-05   # +1.9%  sj3_dr_max < 0.16 and girth2_top2 < 0.0018
+        + 0.0191259 * max(0.0, 0.16 - Q.sj3_dr_max) * max(0.0, 0.0018 - Q.sum_z_dr2_top2) / 6.264269e-05   # +1.9%  sj3_dr_max < 0.16 and sum_z_dr2_top2 < 0.0018
         - 0.01766491 * max(0.0, Q.LHA - 0.257) / 0.03653523   # -1.8%  LHA > 0.257
         + 0.01741765 * max(0.0, 0.00696 - Q.lam1) * max(0.0, 0.0237 - Q.centroid_offset) / 4.222466e-05   # +1.7%  lam1 < 0.00696 and centroid_offset < 0.0237
-        - 0.01663373 * max(0.0, 0.0338 - Q.girth) * max(0.0, 0.0314 - Q.centroid_offset) / 0.0001667647   # -1.7%  girth < 0.0338 and centroid_offset < 0.0314
-        - 0.01639363 * max(0.0, 0.203 - Q.sj3_dr_max) * max(0.0, 0.00185 - Q.girth2_top2) / 8.863884e-05   # -1.6%  sj3_dr_max < 0.203 and girth2_top2 < 0.00185
+        - 0.01663373 * max(0.0, 0.0338 - Q.sum_z_dr) * max(0.0, 0.0314 - Q.centroid_offset) / 0.0001667647   # -1.7%  sum_z_dr < 0.0338 and centroid_offset < 0.0314
+        - 0.01639363 * max(0.0, 0.203 - Q.sj3_dr_max) * max(0.0, 0.00185 - Q.sum_z_dr2_top2) / 8.863884e-05   # -1.6%  sj3_dr_max < 0.203 and sum_z_dr2_top2 < 0.00185
         - 0.01598661 * max(0.0, 0.132 - Q.sj3_dr_max) / 0.0330641   # -1.6%  sj3_dr_max < 0.132
         - 0.01503106 * max(0.0, 0.00858 - Q.mean_eta2) / 0.006056615   # -1.5%  mean_eta2 < 0.00858
         + 0.01478697 * max(0.0, Q.z_6 - 0.043) / 0.02015374   # +1.5%  z_6 > 0.043
@@ -671,7 +671,7 @@ def neuron_8(Q):
         + 0.008917193 * max(0.0, 0.116 - Q.max_dr) / 0.03056003   # +0.9%  max_dr < 0.116
         - 0.008840025 * max(0.0, 0.0172 - Q.tau2) / 0.008119587   # -0.9%  tau2 < 0.0172
         - 0.008834853 * max(0.0, Q.sum_pt_top3 - 436.0) / 83.21584   # -0.9%  sum_pt_top3 > 436
-        - 0.008652281 * max(0.0, 0.00715 - Q.girth2_top3) / 0.003949044   # -0.9%  girth2_top3 < 0.00715
+        - 0.008652281 * max(0.0, 0.00715 - Q.sum_z_dr2_top3) / 0.003949044   # -0.9%  sum_z_dr2_top3 < 0.00715
         + 0.008598731 * max(0.0, 446.0 - Q.sum_pt_top3) / 60.26404   # +0.9%  sum_pt_top3 < 446
         + 0.007992914 * max(0.0, 0.00814 - Q.lam1) * max(0.0, 0.535 - Q.planar_flow) / 0.0009648846   # +0.8%  lam1 < 0.00814 and planar_flow < 0.535
         + 0.007299101 * max(0.0, Q.mean_phi2 - 0.00063) / 0.002789104   # +0.7%  mean_phi2 > 0.00063
@@ -701,7 +701,7 @@ def neuron_8(Q):
         + 0.003185876 * max(0.0, Q.phi_0 - -0.0047) / 0.01911254   # +0.3%  phi_0 > -0.0047
         + 0.0030678 * max(0.0, 0.0568 - Q.sj3_dr_max) / 0.008401166   # +0.3%  sj3_dr_max < 0.0568
         - 0.002835753 * max(0.0, 0.16 - Q.dr0_7) / 0.0928789   # -0.3%  dr0_7 < 0.16
-        + 0.002651691 * max(0.0, Q.log_sum_pt - 6.7) * max(0.0, 0.0027 - Q.girth2_top5) / 6.428349e-05   # +0.3%  log_sum_pt > 6.7 and girth2_top5 < 0.0027
+        + 0.002651691 * max(0.0, Q.log_sum_pt - 6.7) * max(0.0, 0.0027 - Q.sum_z_dr2_top5) / 6.428349e-05   # +0.3%  log_sum_pt > 6.7 and sum_z_dr2_top5 < 0.0027
         - 0.00250765 * max(0.0, 0.00363 - Q.mean_phi) / 0.007552517   # -0.3%  mean_phi < 0.00363
         + 0.00245116 * max(0.0, Q.N2 - 0.215) / 0.05291605   # +0.2%  N2 > 0.215
         - 0.002440124 * max(0.0, 5.57 - Q.ptdr0_6) / 3.325741   # -0.2%  ptdr0_6 < 5.57
@@ -715,7 +715,7 @@ def neuron_8(Q):
         - 0.001799281 * max(0.0, 0.00575 - Q.lam1) * max(0.0, 6.59 - Q.log_sum_pt) / 0.0001762091   # -0.2%  lam1 < 0.00575 and log_sum_pt < 6.59
         + 0.001751969 * max(0.0, Q.mean_eta2 - 0.00919) / 0.0006373415   # +0.2%  mean_eta2 > 0.00919
         - 0.001748016 * max(0.0, 0.159 - Q.sj2_dr) / 0.04831679   # -0.2%  sj2_dr < 0.159
-        - 0.001395604 * max(0.0, Q.girth2_top5 - 0.00906) / 0.001937845   # -0.1%  girth2_top5 > 0.00906
+        - 0.001395604 * max(0.0, Q.sum_z_dr2_top5 - 0.00906) / 0.001937845   # -0.1%  sum_z_dr2_top5 > 0.00906
         - 0.0009995936 * max(0.0, Q.ptdr0_7 - 4.76) / 0.9068641   # -0.1%  ptdr0_7 > 4.76
         - 0.0008175102 * max(0.0, Q.ptdr0_6 - 5.55) / 0.9632872   # -0.1%  ptdr0_6 > 5.55
         - 0.0007621044 * max(0.0, 0.000664 - Q.mean_eta) / 0.005900481   # -0.1%  mean_eta < 0.000664
@@ -738,10 +738,10 @@ def neuron_9(Q):
         - 0.07196317 * max(0.0, 0.0836 - Q.tau1) / 0.03427114   # -7.2%  tau1 < 0.0836
         - 0.07045441 * max(0.0, 0.224 - Q.sj3_dr_max) / 0.08339529   # -7.0%  sj3_dr_max < 0.224
         + 0.05536444 * max(0.0, Q.sj3_dr_max - 0.242) / 0.02312952   # +5.5%  sj3_dr_max > 0.242
-        - 0.03862992 * max(0.0, 0.042 - Q.girth) / 0.00964847   # -3.9%  girth < 0.042
+        - 0.03862992 * max(0.0, 0.042 - Q.sum_z_dr) / 0.00964847   # -3.9%  sum_z_dr < 0.042
         + 0.007680429 * max(0.0, 0.000135 - Q.lam1) / 1.130251e-05   # +0.8%  lam1 < 0.000135
         - 0.007038743 * max(0.0, 910.0 - Q.sum_pt) * max(0.0, 0.0135 - Q.centroid_offset) / 0.479067   # -0.7%  sum_pt < 910 and centroid_offset < 0.0135
-        + 0.006791991 * max(0.0, Q.girth - 0.1) / 0.005689511   # +0.7%  girth > 0.1
+        + 0.006791991 * max(0.0, Q.sum_z_dr - 0.1) / 0.005689511   # +0.7%  sum_z_dr > 0.1
         + 0.006730925 * max(0.0, Q.lam2 - 0.00118) / 0.0003071172   # +0.7%  lam2 > 0.00118
         + 0.004123354 * max(0.0, 994.0 - Q.sum_pt) * max(0.0, 0.0548 - Q.z_5) / 0.4290061   # +0.4%  sum_pt < 994 and z_5 < 0.0548
     )
@@ -781,7 +781,7 @@ def neuron_11(Q):
         - 0.1227592 * max(0.0, 0.138 - Q.tau1) / 0.07865005   # -12.3%  tau1 < 0.138
         + 0.09966724 * max(0.0, Q.sj2_dr - 0.122) / 0.0605274   # +10.0%  sj2_dr > 0.122
         + 0.09846895 * max(0.0, 0.0161 - Q.lam1) * max(0.0, 0.00167 - Q.lam2) / 1.684266e-05   # +9.8%  lam1 < 0.0161 and lam2 < 0.00167
-        - 0.09327173 * max(0.0, 0.0745 - Q.girth) / 0.02687718   # -9.3%  girth < 0.0745
+        - 0.09327173 * max(0.0, 0.0745 - Q.sum_z_dr) / 0.02687718   # -9.3%  sum_z_dr < 0.0745
         - 0.08179642 * max(0.0, Q.sj2_dr - 0.156) / 0.04088494   # -8.2%  sj2_dr > 0.156
         - 0.05031475 * max(0.0, 0.00434 - Q.lam1) * max(0.0, 0.0266 - Q.centroid_offset) / 2.680188e-05   # -5.0%  lam1 < 0.00434 and centroid_offset < 0.0266
         - 0.03699437 * max(0.0, 6.78 - Q.log_sum_pt) / 0.2535739   # -3.7%  log_sum_pt < 6.78
@@ -800,7 +800,7 @@ def neuron_11(Q):
 def neuron_12(Q):
     # scale S = 17.49;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 17.49416 * (0.2600869
-        - 0.2742836 * max(0.0, 0.122 - Q.girth) / 0.06618427   # -27.4%  girth < 0.122
+        - 0.2742836 * max(0.0, 0.122 - Q.sum_z_dr) / 0.06618427   # -27.4%  sum_z_dr < 0.122
         - 0.1835809 * max(0.0, Q.LHA - 0.105) / 0.1408594   # -18.4%  LHA > 0.105
         - 0.07773643 * max(0.0, 0.00455 - Q.lam1) / 0.001699916   # -7.8%  lam1 < 0.00455
         - 0.04869224 * max(0.0, 0.0236 - Q.lam1) / 0.01789558   # -4.9%  lam1 < 0.0236
@@ -815,7 +815,7 @@ def neuron_12(Q):
         + 0.02101614 * max(0.0, Q.log_sum_pt - 6.68) / 0.04192242   # +2.1%  log_sum_pt > 6.68
         + 0.01820684 * max(0.0, 3.59e-09 - Q.e4) / 2.632341e-09   # +1.8%  e4 < 3.59e-09
         - 0.01755542 * max(0.0, 40.6 - Q.pt_7) / 8.082034   # -1.8%  pt_7 < 40.6
-        + 0.01412793 * max(0.0, Q.girth - 0.123) / 0.002786428   # +1.4%  girth > 0.123
+        + 0.01412793 * max(0.0, Q.sum_z_dr - 0.123) / 0.002786428   # +1.4%  sum_z_dr > 0.123
         + 0.01150617 * max(0.0, 0.124 - Q.sj2_dr) / 0.03327118   # +1.2%  sj2_dr < 0.124
         + 0.009313497 * max(0.0, 0.077 - Q.sd_rg) / 0.02724611   # +0.9%  sd_rg < 0.077
         + 0.008083245 * max(0.0, Q.n_dr_0_0p05 - 5.69) / 0.7769755   # +0.8%  n_dr_0_0p05 > 5.69
@@ -824,8 +824,8 @@ def neuron_12(Q):
         - 0.005887872 * max(0.0, Q.sd_rg - 0.321) * max(0.0, 6.94 - Q.log_sum_pt) / 0.001289153   # -0.6%  sd_rg > 0.321 and log_sum_pt < 6.94
         - 0.005675031 * max(0.0, 0.161 - Q.sd_rg) / 0.07041126   # -0.6%  sd_rg < 0.161
         + 0.005276311 * max(0.0, Q.centroid_offset - 0.0348) / 0.002015384   # +0.5%  centroid_offset > 0.0348
-        - 0.004021556 * max(0.0, Q.girth2_top3 - 0.00556) / 0.002605693   # -0.4%  girth2_top3 > 0.00556
-        - 0.003799178 * max(0.0, Q.girth - 0.11) * max(0.0, 65.7 - Q.pt_6) / 0.1149886   # -0.4%  girth > 0.11 and pt_6 < 65.7
+        - 0.004021556 * max(0.0, Q.sum_z_dr2_top3 - 0.00556) / 0.002605693   # -0.4%  sum_z_dr2_top3 > 0.00556
+        - 0.003799178 * max(0.0, Q.sum_z_dr - 0.11) * max(0.0, 65.7 - Q.pt_6) / 0.1149886   # -0.4%  sum_z_dr > 0.11 and pt_6 < 65.7
         + 0.003603476 * max(0.0, Q.sd_rg - 0.316) / 0.002211922   # +0.4%  sd_rg > 0.316
         + 0.003170101 * max(0.0, Q.sd_rg - 0.323) * max(0.0, 6.77 - Q.log_sum_pt) / 0.0009136448   # +0.3%  sd_rg > 0.323 and log_sum_pt < 6.77
         - 0.00315003 * max(0.0, Q.centroid_offset - 0.0246) * max(0.0, 733.0 - Q.sum_pt) / 0.7020014   # -0.3%  centroid_offset > 0.0246 and sum_pt < 733
@@ -833,11 +833,11 @@ def neuron_12(Q):
         + 0.00253597 * max(0.0, Q.sj3_dr_max - 0.256) / 0.0200745   # +0.3%  sj3_dr_max > 0.256
         - 0.001629733 * max(0.0, 0.917 - Q.psi_0p2) / 0.01575183   # -0.2%  psi_0p2 < 0.917
         - 0.001498131 * max(0.0, Q.sd_rg - 0.181) / 0.02096682   # -0.1%  sd_rg > 0.181
-        + 0.001123961 * max(0.0, Q.girth - 0.155) / 0.0006087541   # +0.1%  girth > 0.155
+        + 0.001123961 * max(0.0, Q.sum_z_dr - 0.155) / 0.0006087541   # +0.1%  sum_z_dr > 0.155
         - 0.001081574 * max(0.0, Q.n_dr_0p2_0p4 - 1.6) * max(0.0, 0.00409 - Q.lam2) / 0.000210939   # -0.1%  n_dr_0p2_0p4 > 1.6 and lam2 < 0.00409
         - 0.0008721259 * max(0.0, Q.n_dr_0p2_0p4 - 1.53) * max(0.0, 635.0 - Q.sum_pt) / 8.87041   # -0.1%  n_dr_0p2_0p4 > 1.53 and sum_pt < 635
         - 0.0008655919 * max(0.0, -0.0185 - Q.mean_phi) / 0.001211424   # -0.1%  mean_phi < -0.0185
-        + 0.0006296844 * max(0.0, Q.girth - 0.107) * max(0.0, Q.log_sum_pt - 6.52) / 5.591775e-05   # +0.1%  girth > 0.107 and log_sum_pt > 6.52
+        + 0.0006296844 * max(0.0, Q.sum_z_dr - 0.107) * max(0.0, Q.log_sum_pt - 6.52) / 5.591775e-05   # +0.1%  sum_z_dr > 0.107 and log_sum_pt > 6.52
         + 0.000612026 * max(0.0, Q.dr_2 - 0.135) / 0.005248469   # +0.1%  dr_2 > 0.135
         - 0.0004648545 * max(0.0, Q.dr0_7 - 0.158) / 0.02064019   # -0.0%  dr0_7 > 0.158
         - 0.0004351072 * max(0.0, Q.zdr_0 - 0.046) / 0.0003353231   # -0.0%  zdr_0 > 0.046
@@ -846,7 +846,7 @@ def neuron_12(Q):
         + 0.0002755393 * max(0.0, Q.ptdr0_2 - 17.3) / 0.6219777   # +0.0%  ptdr0_2 > 17.3
         + 0.0001065302 * max(0.0, Q.ptdr0_5 - 13.1) / 0.16066   # +0.0%  ptdr0_5 > 13.1
         + 7.425795e-05 * max(0.0, Q.pt1_dr01 - 19.6) / 1.149628   # +0.0%  pt1_dr01 > 19.6
-        - 6.610084e-05 * max(0.0, Q.girth - 0.144) * max(0.0, Q.log_sum_pt - 6.56) / 6.842476e-06   # -0.0%  girth > 0.144 and log_sum_pt > 6.56
+        - 6.610084e-05 * max(0.0, Q.sum_z_dr - 0.144) * max(0.0, Q.log_sum_pt - 6.56) / 6.842476e-06   # -0.0%  sum_z_dr > 0.144 and log_sum_pt > 6.56
     )
     return max(0.0, z)
 
@@ -854,13 +854,13 @@ def neuron_12(Q):
 def neuron_13(Q):
     # scale S = 12.73;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 12.73494 * (0.4389498
-        - 0.1617646 * max(0.0, 0.162 - Q.girth) * max(0.0, 6.86 - Q.log_sum_pt) / 0.02833649   # -16.2%  girth < 0.162 and log_sum_pt < 6.86
+        - 0.1617646 * max(0.0, 0.162 - Q.sum_z_dr) * max(0.0, 6.86 - Q.log_sum_pt) / 0.02833649   # -16.2%  sum_z_dr < 0.162 and log_sum_pt < 6.86
         + 0.1574583 * max(0.0, 0.377 - Q.LHA) / 0.1392516   # +15.7%  LHA < 0.377
         - 0.115352 * max(0.0, 0.126 - Q.tau1) / 0.0680093   # -11.5%  tau1 < 0.126
         + 0.09065931 * max(0.0, 0.00547 - Q.mean_phi2) / 0.003366009   # +9.1%  mean_phi2 < 0.00547
         + 0.07704008 * max(0.0, 0.00513 - Q.mean_eta2) / 0.003094956   # +7.7%  mean_eta2 < 0.00513
         - 0.06626339 * max(0.0, 0.000711 - Q.lam2) / 0.0005409362   # -6.6%  lam2 < 0.000711
-        - 0.05656409 * max(0.0, 0.153 - Q.girth) * max(0.0, 34.9 - Q.pt_7) / 0.4967865   # -5.7%  girth < 0.153 and pt_7 < 34.9
+        - 0.05656409 * max(0.0, 0.153 - Q.sum_z_dr) * max(0.0, 34.9 - Q.pt_7) / 0.4967865   # -5.7%  sum_z_dr < 0.153 and pt_7 < 34.9
         + 0.0565003 * max(0.0, Q.z_7 - 0.0441) / 0.01337413   # +5.7%  z_7 > 0.0441
         - 0.05086231 * max(0.0, 8.02e-05 - Q.e3) * max(0.0, 0.0338 - Q.centroid_offset) / 1.167078e-06   # -5.1%  e3 < 8.02e-05 and centroid_offset < 0.0338
         - 0.04152262 * max(0.0, Q.LHA - 0.229) / 0.05133865   # -4.2%  LHA > 0.229
@@ -876,16 +876,16 @@ def neuron_13(Q):
 def neuron_14(Q):
     # scale S = 27.13;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 27.12808 * (0.04128563
-        - 0.1554276 * max(0.0, 0.0809 - Q.girth) / 0.03146606   # -15.5%  girth < 0.0809
+        - 0.1554276 * max(0.0, 0.0809 - Q.sum_z_dr) / 0.03146606   # -15.5%  sum_z_dr < 0.0809
         - 0.09094225 * max(0.0, 0.00693 - Q.lam1) / 0.003191577   # -9.1%  lam1 < 0.00693
         + 0.08793604 * max(0.0, 0.0117 - Q.lam1) / 0.0070578   # +8.8%  lam1 < 0.0117
         + 0.06697738 * max(0.0, 0.0981 - Q.tau1) / 0.04464295   # +6.7%  tau1 < 0.0981
-        - 0.05319923 * max(0.0, Q.girth - 0.0875) / 0.007801044   # -5.3%  girth > 0.0875
-        - 0.04275293 * max(0.0, Q.girth - 0.0277) / 0.03557684   # -4.3%  girth > 0.0277
+        - 0.05319923 * max(0.0, Q.sum_z_dr - 0.0875) / 0.007801044   # -5.3%  sum_z_dr > 0.0875
+        - 0.04275293 * max(0.0, Q.sum_z_dr - 0.0277) / 0.03557684   # -4.3%  sum_z_dr > 0.0277
         - 0.0374563 * max(0.0, 0.121 - Q.sj3_dr_min) / 0.08538803   # -3.7%  sj3_dr_min < 0.121
         + 0.03743096 * max(0.0, 0.00349 - Q.lam2) * max(0.0, Q.LHA - 0.171) / 0.0002350533   # +3.7%  lam2 < 0.00349 and LHA > 0.171
         + 0.02946507 * max(0.0, 0.253 - Q.LHA) / 0.04873969   # +2.9%  LHA < 0.253
-        + 0.02754298 * max(0.0, Q.girth - 0.0809) / 0.009270326   # +2.8%  girth > 0.0809
+        + 0.02754298 * max(0.0, Q.sum_z_dr - 0.0809) / 0.009270326   # +2.8%  sum_z_dr > 0.0809
         + 0.02743866 * max(0.0, Q.LHA - 0.318) / 0.01407104   # +2.7%  LHA > 0.318
         + 0.02541244 * max(0.0, 0.00353 - Q.lam2) * max(0.0, Q.sd_rg - 0.159) / 6.324686e-05   # +2.5%  lam2 < 0.00353 and sd_rg > 0.159
         + 0.02459971 * max(0.0, 0.25 - Q.sd_rg) / 0.1401981   # +2.5%  sd_rg < 0.25
@@ -898,7 +898,7 @@ def neuron_14(Q):
         - 0.01627311 * max(0.0, 0.00338 - Q.lam2) * max(0.0, Q.sd_rg - 0.191) / 3.503637e-05   # -1.6%  lam2 < 0.00338 and sd_rg > 0.191
         - 0.01545352 * max(0.0, Q.sj3_dr_max - 0.23) / 0.02603877   # -1.5%  sj3_dr_max > 0.23
         + 0.01542543 * max(0.0, 0.13 - Q.planar_flow) / 0.04205653   # +1.5%  planar_flow < 0.13
-        - 0.01397354 * max(0.0, Q.girth - 0.0557) / 0.01885947   # -1.4%  girth > 0.0557
+        - 0.01397354 * max(0.0, Q.sum_z_dr - 0.0557) / 0.01885947   # -1.4%  sum_z_dr > 0.0557
         + 0.01272966 * max(0.0, Q.sj3_dr13 - 0.0963) / 0.06037262   # +1.3%  sj3_dr13 > 0.0963
         + 0.009930665 * max(0.0, 0.106 - Q.planar_flow) * max(0.0, 0.00664 - Q.lam1) / 4.026904e-05   # +1.0%  planar_flow < 0.106 and lam1 < 0.00664
         + 0.008401392 * max(0.0, 0.00757 - Q.lam1) * max(0.0, Q.centroid_offset - 0.0197) / 6.885609e-06   # +0.8%  lam1 < 0.00757 and centroid_offset > 0.0197
@@ -928,11 +928,11 @@ def neuron_15(Q):
     # scale S = 21.18;  each line: share (fraction of this neuron's average input) * term / its average size
     z = 21.17589 * (-0.003730657
         + 0.1682169 * max(0.0, 0.00353 - Q.lam2) / 0.003152339   # +16.8%  lam2 < 0.00353
-        - 0.147751 * max(0.0, 0.0892 - Q.girth) / 0.03797039   # -14.8%  girth < 0.0892
-        - 0.07468932 * max(0.0, 0.0626 - Q.girth) / 0.01952609   # -7.5%  girth < 0.0626
+        - 0.147751 * max(0.0, 0.0892 - Q.sum_z_dr) / 0.03797039   # -14.8%  sum_z_dr < 0.0892
+        - 0.07468932 * max(0.0, 0.0626 - Q.sum_z_dr) / 0.01952609   # -7.5%  sum_z_dr < 0.0626
         - 0.06511723 * max(0.0, Q.eccentricity - 0.619) / 0.2763358   # -6.5%  eccentricity > 0.619
         + 0.06328735 * max(0.0, 0.267 - Q.LHA) / 0.0560739   # +6.3%  LHA < 0.267
-        - 0.06154086 * max(0.0, Q.girth - 0.0818) / 0.00904988   # -6.2%  girth > 0.0818
+        - 0.06154086 * max(0.0, Q.sum_z_dr - 0.0818) / 0.00904988   # -6.2%  sum_z_dr > 0.0818
         + 0.04063607 * max(0.0, Q.LHA - 0.314) / 0.01501754   # +4.1%  LHA > 0.314
         + 0.03726693 * max(0.0, 0.0566 - Q.tau1) / 0.01848151   # +3.7%  tau1 < 0.0566
         - 0.03369038 * max(0.0, 0.000228 - Q.lam1) / 2.671999e-05   # -3.4%  lam1 < 0.000228
