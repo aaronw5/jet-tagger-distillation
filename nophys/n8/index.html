@@ -473,7 +473,7 @@ function drawResults(){const el=document.getElementById('results');if(!el)return
  <div>show: ${MMETS.map(([k,l])=>`<button class="btn${k==MMET?' on':''}" onclick="MMET='${k}';drawResults()">${l}</button>`).join(' ')}</div>
  <div style="overflow-x:auto;margin-top:6px"><table><tr><th>ROC</th><th>model</th><th>size</th><th class="num">accuracy</th><th class="num">vs network (points)</th><th class="num">same class as the network</th><th class="num">same class as its formula</th>${CL.map(c=>`<th class="num" style="color:${COL[c]}">${c}</th>`).join('')}</tr>${rows}</table></div></div>
  <div class="card"><b>ROC curves of the ticked models</b> <span class="cnt">(background rejection against signal efficiency, log scale; the dot is the model's own decision)</span><div style="margin:4px 0">${sel.map((m,i)=>`<span style="color:${palette[i%palette.length]};margin-right:12px">■ ${esc(m.family==='formula'?m.formula+' terms: '+(m.kind==='formula'?'formula':m.name):m.name)}</span>`).join('')}</div><div class="grid">${rocs}</div></div>`}
-let XT=null;let LZ={},LZN=0,XOPEN=new Set(),XSEC=new Set();
+let XT=null;let LZ={},LZN=0,XOPEN=new Set(),XSEC=new Set([...Array(16).keys()].map(j=>j+'-4'));
 function lz(fn){const k='z'+(LZN++);LZ[k]=fn;return k}
 function lzOpen(d){if(d.open&&!d.dataset.done){d.dataset.done=1;const b=d.querySelector(':scope>.lzb');if(b&&LZ[d.dataset.lz])b.innerHTML=LZ[d.dataset.lz]()}}
 function lzDetails(cls,summary,fn,open,extra){const k=lz(fn);return `<details class="${cls}" data-lz="${k}"${open?' open data-done="1"':''} ontoggle="lzOpen(this)${extra||''}"><summary>${summary}</summary><div class="lzb">${open?fn():''}</div></details>`}
