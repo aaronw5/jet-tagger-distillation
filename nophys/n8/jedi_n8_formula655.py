@@ -57,9 +57,9 @@ Quantities:
   Q.z_5                    pT of particle 5 / total pT
   Q.z_6                    pT of particle 6 / total pT
   Q.z_7                    pT of particle 7 / total pT
-  Q.zdr_0                  pT share × ΔR of particle 0 (its part of the girth)
-  Q.zdr_1                  pT share × ΔR of particle 1 (its part of the girth)
-  Q.zdr_7                  pT share × ΔR of particle 7 (its part of the girth)
+  Q.zdr_0                  pT share × ΔR of particle 0 (its part of the sum_z_dr)
+  Q.zdr_1                  pT share × ΔR of particle 1 (its part of the sum_z_dr)
+  Q.zdr_7                  pT share × ΔR of particle 7 (its part of the sum_z_dr)
   Q.z_2nd                  2nd-largest pT share
   Q.planar_flow            planar flow of the pT-weighted (Δη, Δφ) tensor
   Q.sj3_pair_mass_min      smallest mass of two of the 3 subjets [GeV]
@@ -90,9 +90,9 @@ Quantities:
   Q.sum_pt_top2            total pT of the 2 hardest particles [GeV]
   Q.sum_pt_top3            total pT of the 3 hardest particles [GeV]
   Q.sum_pt_top5            total pT of the 5 hardest particles [GeV]
-  Q.girth2_top2            pT-weighted mean ΔR² of the 2 hardest particles
-  Q.girth2_top3            pT-weighted mean ΔR² of the 3 hardest particles
-  Q.girth2_top5            pT-weighted mean ΔR² of the 5 hardest particles
+  Q.sum_z_dr2_top2            pT-weighted mean ΔR² of the 2 hardest particles
+  Q.sum_z_dr2_top3            pT-weighted mean ΔR² of the 3 hardest particles
+  Q.sum_z_dr2_top5            pT-weighted mean ΔR² of the 5 hardest particles
   Q.n_dr_0_0p05            number of particles with 0 ≤ ΔR < 0.05
   Q.n_dr_0p1_0p2           number of particles with 0.1 ≤ ΔR < 0.2
   Q.n_dr_0p2_0p4           number of particles with 0.2 ≤ ΔR < 0.4
@@ -103,17 +103,17 @@ Quantities:
   Q.z_dr_0p05_0p1          pT share of the particles with 0.05 ≤ ΔR < 0.1
   Q.z_dr_0p1_0p2           pT share of the particles with 0.1 ≤ ΔR < 0.2
   Q.z_dr_0p2_0p4           pT share of the particles with 0.2 ≤ ΔR < 0.4
-  Q.girth                  pT-weighted mean ΔR
-  Q.girth2                 pT-weighted mean ΔR²
+  Q.sum_z_dr                  pT-weighted mean ΔR
+  Q.sum_z_dr2                 pT-weighted mean ΔR²
   Q.mean_eta               pT-weighted mean Δη
   Q.mean_eta2              pT-weighted mean Δη²
   Q.mean_phi               pT-weighted mean Δφ
   Q.mean_phi2              pT-weighted mean Δφ²
   Q.e2                     energy correlation e2 = Σ_{i<j} zᵢzⱼΔRᵢⱼ
-  Q.e2_sq                  Σ_{i<j} zᵢzⱼΔRᵢⱼ²
+  Q.sum_zz_dr2                  Σ_{i<j} zᵢzⱼΔRᵢⱼ²
   Q.psi_0p1                pT share within ΔR < 0.1 of the jet axis
   Q.lam1                   larger eigenvalue of the pT-weighted (Δη, Δφ) tensor
-  Q.width                  λ1 + λ2 of the pT-weighted (Δη, Δφ) tensor
+  Q.lam1_plus_lam2                  λ1 + λ2 of the pT-weighted (Δη, Δφ) tensor
   Q.lam2                   smaller eigenvalue of the pT-weighted (Δη, Δφ) tensor
   Q.tau1                   N-subjettiness τ1 (β=1)
   Q.tau2                   N-subjettiness τ2 (β=1)
@@ -380,9 +380,9 @@ def quantities(pt, eta, phi):
         sum_pt_top2=sum(pt[:2]),
         sum_pt_top3=sum(pt[:3]),
         sum_pt_top5=sum(pt[:5]),
-        girth2_top2=sum(pt[i] * dr[i] ** 2 for i in range(2)) / max(sum(pt[:2]), 1e-9),
-        girth2_top3=sum(pt[i] * dr[i] ** 2 for i in range(3)) / max(sum(pt[:3]), 1e-9),
-        girth2_top5=sum(pt[i] * dr[i] ** 2 for i in range(5)) / max(sum(pt[:5]), 1e-9),
+        sum_z_dr2_top2=sum(pt[i] * dr[i] ** 2 for i in range(2)) / max(sum(pt[:2]), 1e-9),
+        sum_z_dr2_top3=sum(pt[i] * dr[i] ** 2 for i in range(3)) / max(sum(pt[:3]), 1e-9),
+        sum_z_dr2_top5=sum(pt[i] * dr[i] ** 2 for i in range(5)) / max(sum(pt[:5]), 1e-9),
         n_dr_0_0p05=sum(1 for i in real if 0 <= dr[i] < 0.05),
         n_dr_0p1_0p2=sum(1 for i in real if 0.1 <= dr[i] < 0.2),
         n_dr_0p2_0p4=sum(1 for i in real if 0.2 <= dr[i] < 0.4),
@@ -393,17 +393,17 @@ def quantities(pt, eta, phi):
         z_dr_0p05_0p1=sum(z[i] for i in real if 0.05 <= dr[i] < 0.1),
         z_dr_0p1_0p2=sum(z[i] for i in real if 0.1 <= dr[i] < 0.2),
         z_dr_0p2_0p4=sum(z[i] for i in real if 0.2 <= dr[i] < 0.4),
-        girth=sum(z[i] * dr[i] for i in P),
-        girth2=sum(z[i] * dr[i] ** 2 for i in P),
+        sum_z_dr=sum(z[i] * dr[i] for i in P),
+        sum_z_dr2=sum(z[i] * dr[i] ** 2 for i in P),
         mean_eta=sum(z[i] * eta[i] for i in P),
         mean_eta2=sum(z[i] * eta[i] ** 2 for i in P),
         mean_phi=sum(z[i] * phi[i] for i in P),
         mean_phi2=sum(z[i] * phi[i] ** 2 for i in P),
         e2=e2,
-        e2_sq=sum(z[i] * z[j] * dist2(i, j) for i in P for j in P if i < j),
+        sum_zz_dr2=sum(z[i] * z[j] * dist2(i, j) for i in P for j in P if i < j),
         psi_0p1=sum(z[i] for i in real if dr[i] < 0.1),
         lam1=lam1,
-        width=ta + tc,
+        lam1_plus_lam2=ta + tc,
         lam2=lam2,
         tau1=tau_n(1),
         tau2=tau_n(2),
@@ -419,14 +419,14 @@ def neuron_0(Q):
     z = -1.874171
     if Q.planar_flow < 0.1484197:
         z += -10.6124 * Q.planar_flow + 1.575089
-    if Q.width < 0.004372139:
-        z += 812.2171 * Q.width - 1.61164
-    if 0.004372139 <= Q.width < 0.008678045:
-        z += -450.4247 * Q.width + 3.908806
-    if Q.girth2 < 0.01323868:
-        z += -339.4072 * Q.girth2 + 4.620391
-    if 0.01323868 <= Q.girth2 < 0.01882765:
-        z += -22.73938 * Q.girth2 + 0.4281291
+    if Q.lam1_plus_lam2 < 0.004372139:
+        z += 812.2171 * Q.lam1_plus_lam2 - 1.61164
+    if 0.004372139 <= Q.lam1_plus_lam2 < 0.008678045:
+        z += -450.4247 * Q.lam1_plus_lam2 + 3.908806
+    if Q.sum_z_dr2 < 0.01323868:
+        z += -339.4072 * Q.sum_z_dr2 + 4.620391
+    if 0.01323868 <= Q.sum_z_dr2 < 0.01882765:
+        z += -22.73938 * Q.sum_z_dr2 + 0.4281291
     if Q.mass < 21.78408:
         z += 0.2792833 * Q.mass - 7.775014
     if 21.78408 <= Q.mass < 29.6447:
@@ -435,8 +435,8 @@ def neuron_0(Q):
         z += 0.029842 * Q.mass - 1.796522
     if 56.92035 <= Q.mass < 64.61873:
         z += 0.01271759 * Q.mass - 0.8217946
-    if Q.girth2_top3 < 0.007929074:
-        z += 46.24528 * Q.girth2_top3 - 0.3666822
+    if Q.sum_z_dr2_top3 < 0.007929074:
+        z += 46.24528 * Q.sum_z_dr2_top3 - 0.3666822
     if Q.lam1 < 0.0002758826:
         z += -22098.91 * Q.lam1 + 4.504991
     if 0.0002758826 <= Q.lam1 < 0.005433361:
@@ -457,8 +457,8 @@ def neuron_0(Q):
         z += -25.36377 * Q.sj3_dr_max + 6.692271
     if Q.centroid_offset >= 0.04990367:
         z += 25.12933 * Q.centroid_offset - 1.254046
-    if Q.girth < 0.08723651:
-        z += 37.57753 * Q.girth - 3.278132
+    if Q.sum_z_dr < 0.08723651:
+        z += 37.57753 * Q.sum_z_dr - 3.278132
     if Q.e2 < 0.0245477:
         z += -130.5956 * Q.e2 + 3.205821
     if Q.log_sum_pt < 6.080494:
@@ -473,20 +473,20 @@ def neuron_0(Q):
         z += 0.01030262 * Q.sum_pt_top5 - 7.082406
     if Q.lam2 < 7.300726e-05:
         z += 10147.02 * Q.lam2 - 0.7408059
-    if Q.width < 0.004372139 and Q.D2 < 0.7459513:
-        z += -304.9053 * (0.004372139 - Q.width) * (0.7459513 - Q.D2)
+    if Q.lam1_plus_lam2 < 0.004372139 and Q.D2 < 0.7459513:
+        z += -304.9053 * (0.004372139 - Q.lam1_plus_lam2) * (0.7459513 - Q.D2)
     if Q.lam1 < 0.006506576 and Q.D2 < 0.875672:
         z += -1715.355 * (0.006506576 - Q.lam1) * (0.875672 - Q.D2)
-    if Q.girth2 < 0.01323868 and Q.D2 < 1.002471:
-        z += 278.1886 * (0.01323868 - Q.girth2) * (1.002471 - Q.D2)
+    if Q.sum_z_dr2 < 0.01323868 and Q.D2 < 1.002471:
+        z += 278.1886 * (0.01323868 - Q.sum_z_dr2) * (1.002471 - Q.D2)
     if Q.planar_flow < 0.1484197 and Q.sum_pt_top2 < 358.375:
         z += -0.01679745 * (0.1484197 - Q.planar_flow) * (358.375 - Q.sum_pt_top2)
     if Q.sum_pt > 901.5938 and Q.dr12 < 0.119512:
         z += -0.01779231 * (Q.sum_pt - 901.5938) * (0.119512 - Q.dr12)
-    if Q.girth2 < 0.01323868 and Q.centroid_offset > 0.01837778:
-        z += -9231.534 * (0.01323868 - Q.girth2) * (Q.centroid_offset - 0.01837778)
-    if Q.width < 0.004372139 and Q.eccentricity > 0.9598562:
-        z += 2509.521 * (0.004372139 - Q.width) * (Q.eccentricity - 0.9598562)
+    if Q.sum_z_dr2 < 0.01323868 and Q.centroid_offset > 0.01837778:
+        z += -9231.534 * (0.01323868 - Q.sum_z_dr2) * (Q.centroid_offset - 0.01837778)
+    if Q.lam1_plus_lam2 < 0.004372139 and Q.eccentricity > 0.9598562:
+        z += 2509.521 * (0.004372139 - Q.lam1_plus_lam2) * (Q.eccentricity - 0.9598562)
     if Q.mass < 29.6447 and Q.phi_0 < 0.01452637:
         z += -1.449816 * (29.6447 - Q.mass) * (0.01452637 - Q.phi_0)
     if Q.sum_pt > 901.5938 and Q.absphi_3 < 0.03363037:
@@ -499,8 +499,8 @@ def neuron_0(Q):
         z += 0.1243412 * (Q.sum_pt - 901.5938) * (Q.dr0_6 - 0.2347949)
     if Q.log_sum_pt > 6.670067 and Q.dr_4 < 0.07232166:
         z += 76.45641 * (Q.log_sum_pt - 6.670067) * (0.07232166 - Q.dr_4)
-    if Q.girth2 < 0.01882765 and Q.pt_6 < 46.125:
-        z += -1.704895 * (0.01882765 - Q.girth2) * (46.125 - Q.pt_6)
+    if Q.sum_z_dr2 < 0.01882765 and Q.pt_6 < 46.125:
+        z += -1.704895 * (0.01882765 - Q.sum_z_dr2) * (46.125 - Q.pt_6)
     if Q.mass < 64.61873 and Q.D2_b2 < 0.1830092:
         z += -0.1473432 * (64.61873 - Q.mass) * (0.1830092 - Q.D2_b2)
     if Q.lam2 < 7.300726e-05 and Q.D2_b2 < 0.2669656:
@@ -536,24 +536,24 @@ def neuron_1(Q):
         z += 60.29582 * Q.z_7 - 3.160573
     if Q.z_7 >= 0.06164517:
         z += 14.4747 * Q.z_7 - 0.3359227
-    if Q.girth2 < 0.008678045:
-        z += 583.1673 * Q.girth2 - 5.060752
+    if Q.sum_z_dr2 < 0.008678045:
+        z += 583.1673 * Q.sum_z_dr2 - 5.060752
     if Q.sj3_dr_min >= 0.03628191:
         z += -2.169594 * Q.sj3_dr_min + 0.07871702
     if Q.sj3_dr_max >= 0.169029:
         z += 2.612153 * Q.sj3_dr_max - 0.4415297
-    if Q.e2_sq < 0.008168571:
-        z += -195.9185 * Q.e2_sq + 1.600374
+    if Q.sum_zz_dr2 < 0.008168571:
+        z += -195.9185 * Q.sum_zz_dr2 + 1.600374
     if Q.pt_7 >= 53.4375:
         z += -0.06357171 * Q.pt_7 + 3.397113
     if 367.5938 <= Q.sum_pt_top5 < 531.1875:
         z += 0.00325869 * Q.sum_pt_top5 - 1.197874
     if Q.sum_pt_top5 >= 531.1875:
         z += -0.004904293 * Q.sum_pt_top5 + 3.1382
-    if Q.width < 0.00609665:
-        z += 493.2437 * Q.width - 3.007135
-    if Q.girth < 0.0717028:
-        z += 23.58817 * Q.girth - 1.691338
+    if Q.lam1_plus_lam2 < 0.00609665:
+        z += 493.2437 * Q.lam1_plus_lam2 - 3.007135
+    if Q.sum_z_dr < 0.0717028:
+        z += 23.58817 * Q.sum_z_dr - 1.691338
     if Q.lam1 < 0.008375572 and Q.centroid_offset > 0.02076709:
         z += -15352.74 * (0.008375572 - Q.lam1) * (Q.centroid_offset - 0.02076709)
     if Q.pt_7 > 34.53125 and Q.e3 < 2.955458e-05:
@@ -584,8 +584,8 @@ def neuron_1(Q):
         z += -29914.02 * (0.005832932 - Q.mass_over_sum_pt_sq) * (0.03885671 - Q.D2_b2)
     if Q.lam1 < 0.008375572 and Q.n_pt_above_50 > 5.0:
         z += -23.3692 * (0.008375572 - Q.lam1) * (Q.n_pt_above_50 - 5.0)
-    if Q.girth2 < 0.008678045 and Q.centroid_offset > 0.02076709:
-        z += 21428.98 * (0.008678045 - Q.girth2) * (Q.centroid_offset - 0.02076709)
+    if Q.sum_z_dr2 < 0.008678045 and Q.centroid_offset > 0.02076709:
+        z += 21428.98 * (0.008678045 - Q.sum_z_dr2) * (Q.centroid_offset - 0.02076709)
     if Q.mass_over_sum_pt_sq < 0.005832932 and Q.centroid_offset > 0.00809236:
         z += -4615.517 * (0.005832932 - Q.mass_over_sum_pt_sq) * (Q.centroid_offset - 0.00809236)
     if Q.n_dr_0_0p05 < 1.0 and Q.zdr_7 > 0.0007928864:
@@ -617,8 +617,8 @@ def neuron_2(Q):
         z += -36.98985 * Q.z_7 + 2.249228
     if Q.z_7 >= 0.07148865:
         z += -17.88794 * Q.z_7 + 0.8836587
-    if Q.girth < 0.007673833:
-        z += 376.2809 * Q.girth - 2.887517
+    if Q.sum_z_dr < 0.007673833:
+        z += 376.2809 * Q.sum_z_dr - 2.887517
     if Q.pt_7 < 34.53125:
         z += 0.03372864 * Q.pt_7 - 1.802374
     if 34.53125 <= Q.pt_7 < 53.4375:
@@ -639,8 +639,8 @@ def neuron_2(Q):
         z += -0.009934853 * Q.sum_pt + 7.992876
     if 788.4484 <= Q.sum_pt < 840.0195:
         z += -0.003097806 * Q.sum_pt + 2.602217
-    if Q.girth2 < 0.0003193707:
-        z += 17871.84 * Q.girth2 - 5.707741
+    if Q.sum_z_dr2 < 0.0003193707:
+        z += 17871.84 * Q.sum_z_dr2 - 5.707741
     if Q.m012 >= 42.18339:
         z += 0.02528703 * Q.m012 - 1.066692
     if 15.45403 <= Q.mass < 36.22941:
@@ -659,14 +659,14 @@ def neuron_2(Q):
         z += -148.0364 * (Q.z_7 - 0.04939969) * (0.0623951 - Q.sj3_dr_min)
     if Q.log_sum_pt > 6.842717 and Q.pt_6 > 41.21875:
         z += -0.2322119 * (Q.log_sum_pt - 6.842717) * (Q.pt_6 - 41.21875)
-    if Q.girth < 0.007673833 and Q.pt_4 < 71.6875:
-        z += 6.249713 * (0.007673833 - Q.girth) * (71.6875 - Q.pt_4)
+    if Q.sum_z_dr < 0.007673833 and Q.pt_4 < 71.6875:
+        z += 6.249713 * (0.007673833 - Q.sum_z_dr) * (71.6875 - Q.pt_4)
     if Q.pt_6 > 27.57812 and Q.planar_flow < 0.7974684:
         z += -0.01269083 * (Q.pt_6 - 27.57812) * (0.7974684 - Q.planar_flow)
     if Q.sum_pt < 788.4484 and Q.max_dr < 0.03623337:
         z += 0.04938503 * (788.4484 - Q.sum_pt) * (0.03623337 - Q.max_dr)
-    if Q.girth2 < 0.0003193707 and Q.mass_top2 < 36.76827:
-        z += 476.4327 * (0.0003193707 - Q.girth2) * (36.76827 - Q.mass_top2)
+    if Q.sum_z_dr2 < 0.0003193707 and Q.mass_top2 < 36.76827:
+        z += 476.4327 * (0.0003193707 - Q.sum_z_dr2) * (36.76827 - Q.mass_top2)
     if Q.z_7 < 0.07148865 and Q.planar_flow < 0.6947818:
         z += -14.19778 * (0.07148865 - Q.z_7) * (0.6947818 - Q.planar_flow)
     if Q.sum_pt < 840.0195 and Q.dr_5 < 0.02164863:
@@ -696,20 +696,20 @@ def neuron_3(Q):
         z += 507.2742 * Q.lam1 - 4.065948
     if Q.lam1 >= 0.01643375:
         z += 912.2924 * Q.lam1 - 10.72192
-    if 0.04081947 <= Q.girth < 0.07608178:
-        z += 43.77155 * Q.girth - 1.786732
-    if Q.girth >= 0.07608178:
-        z += 112.2043 * Q.girth - 6.993216
-    if 0.007520088 <= Q.width < 0.01323868:
-        z += 618.5131 * Q.width - 4.651273
-    if Q.width >= 0.01323868:
-        z += -29.81592 * Q.width + 3.931744
+    if 0.04081947 <= Q.sum_z_dr < 0.07608178:
+        z += 43.77155 * Q.sum_z_dr - 1.786732
+    if Q.sum_z_dr >= 0.07608178:
+        z += 112.2043 * Q.sum_z_dr - 6.993216
+    if 0.007520088 <= Q.lam1_plus_lam2 < 0.01323868:
+        z += 618.5131 * Q.lam1_plus_lam2 - 4.651273
+    if Q.lam1_plus_lam2 >= 0.01323868:
+        z += -29.81592 * Q.lam1_plus_lam2 + 3.931744
     if Q.e2 >= 0.06344108:
         z += 110.7194 * Q.e2 - 7.024157
-    if Q.girth2 < 0.004372139:
-        z += 196.3784 * Q.girth2 - 0.8585938
-    if Q.girth2 >= 0.008678045:
-        z += -1490.812 * Q.girth2 + 12.93734
+    if Q.sum_z_dr2 < 0.004372139:
+        z += 196.3784 * Q.sum_z_dr2 - 0.8585938
+    if Q.sum_z_dr2 >= 0.008678045:
+        z += -1490.812 * Q.sum_z_dr2 + 12.93734
     if 0.1492731 <= Q.sj2_dr < 0.1872617:
         z += -7.94712 * Q.sj2_dr + 1.186291
     if 0.1872617 <= Q.sj2_dr < 0.2687922:
@@ -720,10 +720,10 @@ def neuron_3(Q):
         z += -21.60212 * Q.mean_eta - 0.1007726
     if Q.mean_eta >= 0.01772426:
         z += 33.75097 * Q.mean_eta - 0.5982108
-    if Q.girth2_top5 < 0.007164202:
-        z += 0.9839401 * Q.girth2_top5 + 0.07354018
-    if 0.007164202 <= Q.girth2_top5 < 0.008329695:
-        z += -69.14611 * Q.girth2_top5 + 0.575966
+    if Q.sum_z_dr2_top5 < 0.007164202:
+        z += 0.9839401 * Q.sum_z_dr2_top5 + 0.07354018
+    if 0.007164202 <= Q.sum_z_dr2_top5 < 0.008329695:
+        z += -69.14611 * Q.sum_z_dr2_top5 + 0.575966
     if Q.max_dr >= 0.1027585:
         z += 8.789384 * Q.max_dr - 0.9031841
     if Q.mass >= 64.61873:
@@ -734,16 +734,16 @@ def neuron_3(Q):
         z += -10.60462 * Q.z_dr_0_0p05 + 0.5542214
     if Q.mass_over_sum_pt > 0.0681391 and Q.pt_6 > 31.90625:
         z += -0.7755443 * (Q.mass_over_sum_pt - 0.0681391) * (Q.pt_6 - 31.90625)
-    if Q.girth > 0.04081947 and Q.log_sum_pt > 6.080494:
-        z += 87.26238 * (Q.girth - 0.04081947) * (Q.log_sum_pt - 6.080494)
+    if Q.sum_z_dr > 0.04081947 and Q.log_sum_pt > 6.080494:
+        z += 87.26238 * (Q.sum_z_dr - 0.04081947) * (Q.log_sum_pt - 6.080494)
     if Q.e2 > 0.06344108 and Q.sj2_mass1 > 16.86126:
         z += 1.259894 * (Q.e2 - 0.06344108) * (Q.sj2_mass1 - 16.86126)
     if Q.sj2_dr > 0.1872617 and Q.sj2_mass1 > 2.250113:
         z += -0.3882688 * (Q.sj2_dr - 0.1872617) * (Q.sj2_mass1 - 2.250113)
     if Q.mass_over_sum_pt > 0.0681391 and Q.sj2_dr < 0.2179769:
         z += -1443.659 * (Q.mass_over_sum_pt - 0.0681391) * (0.2179769 - Q.sj2_dr)
-    if Q.width > 0.007520088 and Q.sj3_pairmin_over_m > 0.07708997:
-        z += 314.7526 * (Q.width - 0.007520088) * (Q.sj3_pairmin_over_m - 0.07708997)
+    if Q.lam1_plus_lam2 > 0.007520088 and Q.sj3_pairmin_over_m > 0.07708997:
+        z += 314.7526 * (Q.lam1_plus_lam2 - 0.007520088) * (Q.sj3_pairmin_over_m - 0.07708997)
     if Q.centroid_offset > 0.01096064 and Q.abseta_0 < 0.07861328:
         z += 497.7627 * (Q.centroid_offset - 0.01096064) * (0.07861328 - Q.abseta_0)
     if Q.lam2 > 0.001130645 and Q.pt_6 < 56.53125:
@@ -754,8 +754,8 @@ def neuron_3(Q):
         z += -315.9025 * (Q.sj2_dr - 0.1872617) * (0.05268713 - Q.dr_3)
     if Q.tau1 > 0.05356915 and Q.pt_5 > 59.125:
         z += 0.440445 * (Q.tau1 - 0.05356915) * (Q.pt_5 - 59.125)
-    if Q.girth > 0.07608178 and Q.eta_0 > 0.07952881:
-        z += 88.20127 * (Q.girth - 0.07608178) * (Q.eta_0 - 0.07952881)
+    if Q.sum_z_dr > 0.07608178 and Q.eta_0 > 0.07952881:
+        z += 88.20127 * (Q.sum_z_dr - 0.07608178) * (Q.eta_0 - 0.07952881)
     if Q.lam2 > 0.001130645 and Q.z_6 > 0.05096142:
         z += 9402.264 * (Q.lam2 - 0.001130645) * (Q.z_6 - 0.05096142)
     if Q.max_dr > 0.1027585 and Q.eta_1 < -0.05963135:
@@ -775,36 +775,36 @@ def neuron_4(Q):
         z += 5022.328 * Q.lam2 - 2.698427
     if Q.mass_over_sum_pt >= 0.09041383:
         z += -92.32117 * Q.mass_over_sum_pt + 8.34711
-    if Q.girth2 < 0.002635418:
-        z += 428.4106 * Q.girth2 - 10.34559
-    if 0.002635418 <= Q.girth2 < 0.003562611:
-        z += 1094.421 * Q.girth2 - 12.1008
-    if 0.003562611 <= Q.girth2 < 0.008678045:
-        z += 1270.285 * Q.girth2 - 12.72734
-    if 0.008678045 <= Q.girth2 < 0.01882765:
-        z += 432.3646 * Q.girth2 - 5.455825
-    if Q.girth2 >= 0.01882765:
-        z += 175.8649 * Q.girth2 - 0.6265382
+    if Q.sum_z_dr2 < 0.002635418:
+        z += 428.4106 * Q.sum_z_dr2 - 10.34559
+    if 0.002635418 <= Q.sum_z_dr2 < 0.003562611:
+        z += 1094.421 * Q.sum_z_dr2 - 12.1008
+    if 0.003562611 <= Q.sum_z_dr2 < 0.008678045:
+        z += 1270.285 * Q.sum_z_dr2 - 12.72734
+    if 0.008678045 <= Q.sum_z_dr2 < 0.01882765:
+        z += 432.3646 * Q.sum_z_dr2 - 5.455825
+    if Q.sum_z_dr2 >= 0.01882765:
+        z += 175.8649 * Q.sum_z_dr2 - 0.6265382
     if 0.009668065 <= Q.e2 < 0.04447357:
         z += 53.20971 * Q.e2 - 0.514435
     if Q.e2 >= 0.04447357:
         z += 22.90589 * Q.e2 + 0.8332844
     if Q.sum_pt < 739.5:
         z += 0.01019426 * Q.sum_pt - 7.538652
-    if Q.girth2_top2 < 0.007639643:
-        z += -71.92804 * Q.girth2_top2 + 0.5495046
+    if Q.sum_z_dr2_top2 < 0.007639643:
+        z += -71.92804 * Q.sum_z_dr2_top2 + 0.5495046
     if 0.169029 <= Q.sj3_dr_max < 0.233678:
         z += 29.07239 * Q.sj3_dr_max - 4.914078
     if Q.sj3_dr_max >= 0.233678:
         z += -13.9991 * Q.sj3_dr_max + 5.15078
-    if Q.e2_sq < 0.01165737:
-        z += -1040.938 * Q.e2_sq + 14.16898
-    if 0.01165737 <= Q.e2_sq < 0.01716248:
-        z += -369.542 * Q.e2_sq + 6.342258
-    if 0.05464922 <= Q.girth < 0.1019409:
-        z += -47.734 * Q.girth + 2.608626
-    if Q.girth >= 0.1019409:
-        z += -32.51441 * Q.girth + 1.057127
+    if Q.sum_zz_dr2 < 0.01165737:
+        z += -1040.938 * Q.sum_zz_dr2 + 14.16898
+    if 0.01165737 <= Q.sum_zz_dr2 < 0.01716248:
+        z += -369.542 * Q.sum_zz_dr2 + 6.342258
+    if 0.05464922 <= Q.sum_z_dr < 0.1019409:
+        z += -47.734 * Q.sum_z_dr + 2.608626
+    if Q.sum_z_dr >= 0.1019409:
+        z += -32.51441 * Q.sum_z_dr + 1.057127
     if 0.07283629 <= Q.tau1 < 0.1136369:
         z += 8.215302 * Q.tau1 - 0.5983721
     if Q.tau1 >= 0.1136369:
@@ -817,8 +817,8 @@ def neuron_4(Q):
         z += -0.05318825 * Q.mass + 4.688851
     if Q.C2 < 0.05119235:
         z += 21.51164 * Q.C2 - 1.101231
-    if Q.girth2_top5 < 0.008329695:
-        z += -61.95441 * Q.girth2_top5 + 0.5160614
+    if Q.sum_z_dr2_top5 < 0.008329695:
+        z += -61.95441 * Q.sum_z_dr2_top5 + 0.5160614
     if 0.1117619 <= Q.max_dr < 0.2215867:
         z += 2.335267 * Q.max_dr - 0.2609938
     if Q.max_dr >= 0.2215867:
@@ -827,8 +827,8 @@ def neuron_4(Q):
         z += -2.615985 * Q.D2 + 2.622448
     if Q.tau21_b2 < 0.004811143:
         z += 149.2902 * Q.tau21_b2 - 0.7182566
-    if Q.width < 0.01323868:
-        z += 268.7117 * Q.width - 3.557386
+    if Q.lam1_plus_lam2 < 0.01323868:
+        z += 268.7117 * Q.lam1_plus_lam2 - 3.557386
     if Q.C2_b2 < 0.009032972:
         z += -264.6314 * Q.C2_b2 + 2.390408
     if Q.mean_eta >= 0.02644207:
@@ -837,8 +837,8 @@ def neuron_4(Q):
         z += -0.01364275 * Q.sd_mass + 0.5244233
     if Q.N2 < 0.2233283 and Q.mass < 60.63098:
         z += -0.611209 * (0.2233283 - Q.N2) * (60.63098 - Q.mass)
-    if Q.N2 < 0.2233283 and Q.e2_sq > 0.01165737:
-        z += -1640.867 * (0.2233283 - Q.N2) * (Q.e2_sq - 0.01165737)
+    if Q.N2 < 0.2233283 and Q.sum_zz_dr2 > 0.01165737:
+        z += -1640.867 * (0.2233283 - Q.N2) * (Q.sum_zz_dr2 - 0.01165737)
     if Q.N2 < 0.2233283 and Q.pt_6 < 62.25:
         z += -0.04888712 * (0.2233283 - Q.N2) * (62.25 - Q.pt_6)
     if Q.N2 < 0.2233283 and Q.mean_phi < -0.009352575:
@@ -853,16 +853,16 @@ def neuron_4(Q):
         z += -715.1789 * (0.05119235 - Q.C2) * (Q.mean_eta - 0.02644207)
     if Q.mass < 76.6557 and Q.D2 < 0.875672:
         z += -0.1959676 * (76.6557 - Q.mass) * (0.875672 - Q.D2)
-    if Q.e2_sq < 0.01165737 and Q.D2 < 0.875672:
-        z += 497.0181 * (0.01165737 - Q.e2_sq) * (0.875672 - Q.D2)
+    if Q.sum_zz_dr2 < 0.01165737 and Q.D2 < 0.875672:
+        z += 497.0181 * (0.01165737 - Q.sum_zz_dr2) * (0.875672 - Q.D2)
     if Q.mass < 76.6557 and Q.mean_eta2 > 0.006395693:
         z += 5.187951 * (76.6557 - Q.mass) * (Q.mean_eta2 - 0.006395693)
     if Q.N2 < 0.2233283 and Q.pt_7 < 25.57812:
         z += -0.5002723 * (0.2233283 - Q.N2) * (25.57812 - Q.pt_7)
     if Q.D2 < 1.002471 and Q.pt_7 < 53.4375:
         z += -0.09493871 * (1.002471 - Q.D2) * (53.4375 - Q.pt_7)
-    if Q.girth2_top2 < 0.007639643 and Q.mean_eta < -0.01790907:
-        z += 3148.807 * (0.007639643 - Q.girth2_top2) * (-0.01790907 - Q.mean_eta)
+    if Q.sum_z_dr2_top2 < 0.007639643 and Q.mean_eta < -0.01790907:
+        z += 3148.807 * (0.007639643 - Q.sum_z_dr2_top2) * (-0.01790907 - Q.mean_eta)
     if Q.lam2 < 0.000537286 and Q.mean_phi < -0.01753483:
         z += -76595.25 * (0.000537286 - Q.lam2) * (-0.01753483 - Q.mean_phi)
     if Q.sum_pt < 739.5 and Q.sj3_mass2 < 1.186019:
@@ -886,18 +886,18 @@ def neuron_5(Q):
         z += -10.39595 * Q.log_sum_pt + 71.8156
     if Q.log_sum_pt >= 6.896095:
         z += -16.05337 * Q.log_sum_pt + 110.8297
-    if Q.e2_sq < 0.005284669:
-        z += -191.3703 * Q.e2_sq + 1.011329
+    if Q.sum_zz_dr2 < 0.005284669:
+        z += -191.3703 * Q.sum_zz_dr2 + 1.011329
     if Q.z_6 < 0.02886576:
         z += -117.9949 * Q.z_6 + 3.406013
-    if Q.girth2 < 9.121392e-05:
-        z += -12436.69 * Q.girth2 + 2.99931
-    if 9.121392e-05 <= Q.girth2 < 0.001653836:
-        z += -850.9657 * Q.girth2 + 1.942531
-    if 0.001653836 <= Q.girth2 < 0.002635418:
-        z += -545.2147 * Q.girth2 + 1.436868
-    if Q.girth < 0.007673833:
-        z += 181.4254 * Q.girth - 1.392228
+    if Q.sum_z_dr2 < 9.121392e-05:
+        z += -12436.69 * Q.sum_z_dr2 + 2.99931
+    if 9.121392e-05 <= Q.sum_z_dr2 < 0.001653836:
+        z += -850.9657 * Q.sum_z_dr2 + 1.942531
+    if 0.001653836 <= Q.sum_z_dr2 < 0.002635418:
+        z += -545.2147 * Q.sum_z_dr2 + 1.436868
+    if Q.sum_z_dr < 0.007673833:
+        z += 181.4254 * Q.sum_z_dr - 1.392228
     if Q.pt_7 < 23.21641:
         z += 0.1335653 * Q.pt_7 - 4.962785
     if 23.21641 <= Q.pt_7 < 37.15625:
@@ -914,8 +914,8 @@ def neuron_5(Q):
         z += 6.342803 * Q.sj3_dr_max - 1.910462
     if Q.mass < 60.63098:
         z += -0.008766005 * Q.mass + 0.5314914
-    if Q.girth2_top3 < 0.002915531:
-        z += 319.9088 * Q.girth2_top3 - 0.9327042
+    if Q.sum_z_dr2_top3 < 0.002915531:
+        z += 319.9088 * Q.sum_z_dr2_top3 - 0.9327042
     if Q.z_5 < 0.02818362:
         z += -92.87887 * Q.z_5 + 2.617663
     if Q.mass_over_sum_pt < 0.09041383:
@@ -930,8 +930,8 @@ def neuron_5(Q):
         z += -0.007252004 * (0.04939969 - Q.z_7) * (68.43422 - Q.mass_top5)
     if Q.LHA < 0.2160559 and Q.log_sum_pt < 6.804164:
         z += -88.45407 * (0.2160559 - Q.LHA) * (6.804164 - Q.log_sum_pt)
-    if Q.e2_sq < 0.005284669 and Q.centroid_offset < 0.01437952:
-        z += 4804.217 * (0.005284669 - Q.e2_sq) * (0.01437952 - Q.centroid_offset)
+    if Q.sum_zz_dr2 < 0.005284669 and Q.centroid_offset < 0.01437952:
+        z += 4804.217 * (0.005284669 - Q.sum_zz_dr2) * (0.01437952 - Q.centroid_offset)
     if Q.z_7 < 0.07148865 and Q.centroid_offset < 0.03117077:
         z += -734.813 * (0.07148865 - Q.z_7) * (0.03117077 - Q.centroid_offset)
     if Q.z_7 < 0.04939969 and Q.sum_pt_top2 < 501.625:
@@ -942,12 +942,12 @@ def neuron_5(Q):
         z += 0.4047586 * (0.07148865 - Q.z_7) * (42.18339 - Q.mass_top3)
     if Q.z_7 < 0.07148865 and Q.C3 < 0.03532852:
         z += -206.7258 * (0.07148865 - Q.z_7) * (0.03532852 - Q.C3)
-    if Q.girth2 < 0.001653836 and Q.centroid_offset < 0.02355416:
-        z += 88021.47 * (0.001653836 - Q.girth2) * (0.02355416 - Q.centroid_offset)
+    if Q.sum_z_dr2 < 0.001653836 and Q.centroid_offset < 0.02355416:
+        z += 88021.47 * (0.001653836 - Q.sum_z_dr2) * (0.02355416 - Q.centroid_offset)
     if Q.z_7 < 0.07148865 and Q.C2_b2 > 0.001109927:
         z += -938.9206 * (0.07148865 - Q.z_7) * (Q.C2_b2 - 0.001109927)
-    if Q.e2_sq < 0.005284669 and Q.pt_6 > 27.57812:
-        z += -2.744027 * (0.005284669 - Q.e2_sq) * (Q.pt_6 - 27.57812)
+    if Q.sum_zz_dr2 < 0.005284669 and Q.pt_6 > 27.57812:
+        z += -2.744027 * (0.005284669 - Q.sum_zz_dr2) * (Q.pt_6 - 27.57812)
     if Q.mass < 60.63098 and Q.D2 < 3.885568:
         z += 0.003260656 * (60.63098 - Q.mass) * (3.885568 - Q.D2)
     if Q.z_6 < 0.02886576 and Q.phi_0 > 0.008850098:
@@ -962,16 +962,16 @@ def neuron_5(Q):
         z += -701.4154 * (Q.log_sum_pt - 6.896095) * (Q.eccentricity - 0.9781608)
     if Q.log_sum_pt > 6.701242 and Q.mean_phi2 < 0.0002302115:
         z += 55894.08 * (Q.log_sum_pt - 6.701242) * (0.0002302115 - Q.mean_phi2)
-    if Q.girth2 < 0.001653836 and Q.absphi_0 < 0.01452637:
-        z += -14636.36 * (0.001653836 - Q.girth2) * (0.01452637 - Q.absphi_0)
+    if Q.sum_z_dr2 < 0.001653836 and Q.absphi_0 < 0.01452637:
+        z += -14636.36 * (0.001653836 - Q.sum_z_dr2) * (0.01452637 - Q.absphi_0)
     if Q.zdr_0 < 0.02383244 and Q.z_5 > 0.02818362:
         z += 215.5856 * (0.02383244 - Q.zdr_0) * (Q.z_5 - 0.02818362)
     if Q.log_sum_pt > 6.896095 and Q.mean_phi2 < 0.0002302115:
         z += -109231.0 * (Q.log_sum_pt - 6.896095) * (0.0002302115 - Q.mean_phi2)
     if Q.tau1 < 0.09538712 and Q.planar_flow < 0.4926918:
         z += 8.555479 * (0.09538712 - Q.tau1) * (0.4926918 - Q.planar_flow)
-    if Q.girth2_top3 < 0.002915531 and Q.tau3 < 0.006646257:
-        z += -18717.68 * (0.002915531 - Q.girth2_top3) * (0.006646257 - Q.tau3)
+    if Q.sum_z_dr2_top3 < 0.002915531 and Q.tau3 < 0.006646257:
+        z += -18717.68 * (0.002915531 - Q.sum_z_dr2_top3) * (0.006646257 - Q.tau3)
     if Q.log_sum_pt > 6.701242 and Q.mean_eta2 < 9.030369e-05:
         z += 68924.6 * (Q.log_sum_pt - 6.701242) * (9.030369e-05 - Q.mean_eta2)
     if Q.log_sum_pt > 6.701242 and Q.mean_eta2 < 0.00424745:
@@ -985,8 +985,8 @@ def neuron_6(Q):
         z += 59.91779 * Q.centroid_offset - 0.4848763
     if Q.centroid_offset >= 0.01837778:
         z += -16.29999 * Q.centroid_offset + 0.9158372
-    if Q.width < 0.01323868:
-        z += 464.5751 * Q.width - 6.150359
+    if Q.lam1_plus_lam2 < 0.01323868:
+        z += 464.5751 * Q.lam1_plus_lam2 - 6.150359
     if Q.mass < 45.7571:
         z += -0.05236822 * Q.mass + 2.49013
     if 45.7571 <= Q.mass < 60.63098:
@@ -1013,8 +1013,8 @@ def neuron_6(Q):
         z += -0.04379737 * Q.sj3_pair_mass_min + 0.1971638
     if Q.sum_pt < 615.875:
         z += 0.00208068 * Q.sum_pt - 1.281439
-    if Q.e2_sq < 0.0030133:
-        z += -493.4409 * Q.e2_sq + 1.486886
+    if Q.sum_zz_dr2 < 0.0030133:
+        z += -493.4409 * Q.sum_zz_dr2 + 1.486886
     if Q.eccentricity >= 0.927072:
         z += -2.894557 * Q.eccentricity + 2.683463
     if Q.sj3_dr_max < 0.1789613:
@@ -1031,8 +1031,8 @@ def neuron_6(Q):
         z += -71.43581 * Q.mean_eta + 1.888911
     if Q.e3 < 0.0005116989:
         z += -1370.529 * Q.e3 + 0.7012983
-    if Q.girth2 < 0.008678045:
-        z += 883.6243 * Q.girth2 - 7.668131
+    if Q.sum_z_dr2 < 0.008678045:
+        z += 883.6243 * Q.sum_z_dr2 - 7.668131
     if Q.C2_b2 < 0.02415398:
         z += -60.83549 * Q.C2_b2 + 1.46942
     if Q.centroid_offset > 0.00809236 and Q.sj3_pair_mass_min > 6.811308:
@@ -1082,22 +1082,22 @@ def neuron_6(Q):
 
 def neuron_7(Q):
     z = 8.31565
-    if Q.girth2_top2 < 0.001056655:
-        z += -310.8044 * Q.girth2_top2 + 0.3284131
-    if Q.girth2 < 0.0009641429:
-        z += 1648.502 * Q.girth2 - 1.881514
-    if 0.0009641429 <= Q.girth2 < 0.001653836:
-        z += 112.4207 * Q.girth2 - 0.4005114
-    if 0.001653836 <= Q.girth2 < 0.003562611:
-        z += 511.3796 * Q.girth2 - 1.060324
-    if 0.003562611 <= Q.girth2 < 0.004372139:
-        z += 398.9588 * Q.girth2 - 0.6598126
-    if 0.004372139 <= Q.girth2 < 0.007520088:
-        z += 110.5998 * Q.girth2 + 0.6009333
-    if 0.007520088 <= Q.girth2 < 0.01323868:
-        z += -912.8895 * Q.girth2 + 8.297663
-    if Q.girth2 >= 0.01323868:
-        z += -99.0282 * Q.girth2 - 2.476782
+    if Q.sum_z_dr2_top2 < 0.001056655:
+        z += -310.8044 * Q.sum_z_dr2_top2 + 0.3284131
+    if Q.sum_z_dr2 < 0.0009641429:
+        z += 1648.502 * Q.sum_z_dr2 - 1.881514
+    if 0.0009641429 <= Q.sum_z_dr2 < 0.001653836:
+        z += 112.4207 * Q.sum_z_dr2 - 0.4005114
+    if 0.001653836 <= Q.sum_z_dr2 < 0.003562611:
+        z += 511.3796 * Q.sum_z_dr2 - 1.060324
+    if 0.003562611 <= Q.sum_z_dr2 < 0.004372139:
+        z += 398.9588 * Q.sum_z_dr2 - 0.6598126
+    if 0.004372139 <= Q.sum_z_dr2 < 0.007520088:
+        z += 110.5998 * Q.sum_z_dr2 + 0.6009333
+    if 0.007520088 <= Q.sum_z_dr2 < 0.01323868:
+        z += -912.8895 * Q.sum_z_dr2 + 8.297663
+    if Q.sum_z_dr2 >= 0.01323868:
+        z += -99.0282 * Q.sum_z_dr2 - 2.476782
     if 0.01109984 <= Q.mass_over_sum_pt < 0.07269073:
         z += -57.2821 * Q.mass_over_sum_pt + 0.6358223
     if 0.07269073 <= Q.mass_over_sum_pt < 0.08475161:
@@ -1110,10 +1110,10 @@ def neuron_7(Q):
         z += -144.6339 * Q.mass_over_sum_pt + 14.18345
     if Q.tau1 < 0.05356915:
         z += -32.37513 * Q.tau1 + 1.734308
-    if Q.girth < 0.04081947:
-        z += 122.2895 * Q.girth - 8.718778
-    if 0.04081947 <= Q.girth < 0.08723651:
-        z += 80.29346 * Q.girth - 7.004521
+    if Q.sum_z_dr < 0.04081947:
+        z += 122.2895 * Q.sum_z_dr - 8.718778
+    if 0.04081947 <= Q.sum_z_dr < 0.08723651:
+        z += 80.29346 * Q.sum_z_dr - 7.004521
     if 36.22941 <= Q.mass < 76.6557:
         z += 0.0630198 * Q.mass - 2.28317
     if Q.mass >= 76.6557:
@@ -1126,10 +1126,10 @@ def neuron_7(Q):
         z += 42.04938 * Q.centroid_offset - 1.310712
     if Q.centroid_offset >= 0.03776099:
         z += -65.98578 * Q.centroid_offset + 2.768803
-    if 0.005590289 <= Q.width < 0.008678045:
-        z += -1139.602 * Q.width + 6.370704
-    if Q.width >= 0.008678045:
-        z += -304.1452 * Q.width - 0.8794273
+    if 0.005590289 <= Q.lam1_plus_lam2 < 0.008678045:
+        z += -1139.602 * Q.lam1_plus_lam2 + 6.370704
+    if Q.lam1_plus_lam2 >= 0.008678045:
+        z += -304.1452 * Q.lam1_plus_lam2 - 0.8794273
     if Q.z_7 >= 0.03243272:
         z += 14.45937 * Q.z_7 - 0.4689567
     if 0.03556091 <= Q.e2 < 0.05028464:
@@ -1142,8 +1142,8 @@ def neuron_7(Q):
         z += -0.6033821 * Q.sj2_dr - 0.872786
     if 0.1591713 <= Q.sj2_dr < 0.1872617:
         z += 34.48959 * Q.sj2_dr - 6.458581
-    if Q.e2_sq < 0.001101266:
-        z += 342.589 * Q.e2_sq - 0.3772817
+    if Q.sum_zz_dr2 < 0.001101266:
+        z += 342.589 * Q.sum_zz_dr2 - 0.3772817
     if Q.LHA < 0.3033137:
         z += -9.97061 * Q.LHA + 3.024223
     if Q.pt_7 < 29.04219:
@@ -1154,8 +1154,8 @@ def neuron_7(Q):
         z += 230.5287 * Q.lam1 - 1.93081
     if Q.e3 < 8.147744e-05:
         z += 20952.65 * Q.e3 - 1.707168
-    if Q.planar_flow < 0.1950135 and Q.width > 0.007520088:
-        z += -217.1256 * (0.1950135 - Q.planar_flow) * (Q.width - 0.007520088)
+    if Q.planar_flow < 0.1950135 and Q.lam1_plus_lam2 > 0.007520088:
+        z += -217.1256 * (0.1950135 - Q.planar_flow) * (Q.lam1_plus_lam2 - 0.007520088)
     if Q.planar_flow < 0.1950135 and Q.pt_6 < 35.28125:
         z += -0.2014438 * (0.1950135 - Q.planar_flow) * (35.28125 - Q.pt_6)
     if Q.planar_flow < 0.1950135 and Q.sd_mass > 38.43971:
@@ -1166,16 +1166,16 @@ def neuron_7(Q):
         z += -15.01365 * (Q.centroid_offset - 0.03117077) * (Q.n_pt_above_50 - 4.0)
     if Q.centroid_offset < 0.02076709 and Q.sum_pt_top3 > 331.25:
         z += 0.07497185 * (0.02076709 - Q.centroid_offset) * (Q.sum_pt_top3 - 331.25)
-    if Q.girth2 > 0.004372139 and Q.planar_flow < 0.1950135:
-        z += 710.4113 * (Q.girth2 - 0.004372139) * (0.1950135 - Q.planar_flow)
-    if Q.girth2 > 0.01323868 and Q.eccentricity > 0.9458207:
-        z += -5919.083 * (Q.girth2 - 0.01323868) * (Q.eccentricity - 0.9458207)
+    if Q.sum_z_dr2 > 0.004372139 and Q.planar_flow < 0.1950135:
+        z += 710.4113 * (Q.sum_z_dr2 - 0.004372139) * (0.1950135 - Q.planar_flow)
+    if Q.sum_z_dr2 > 0.01323868 and Q.eccentricity > 0.9458207:
+        z += -5919.083 * (Q.sum_z_dr2 - 0.01323868) * (Q.eccentricity - 0.9458207)
     if Q.centroid_offset > 0.03776099 and Q.pt_4 > 81.375:
         z += -38.32036 * (Q.centroid_offset - 0.03776099) * (Q.pt_4 - 81.375)
     if Q.centroid_offset < 0.02076709 and Q.C2_b2 < 0.004032342:
         z += -22631.38 * (0.02076709 - Q.centroid_offset) * (0.004032342 - Q.C2_b2)
-    if Q.girth < 0.08723651 and Q.C2_b2 < 0.004032342:
-        z += 1836.969 * (0.08723651 - Q.girth) * (0.004032342 - Q.C2_b2)
+    if Q.sum_z_dr < 0.08723651 and Q.C2_b2 < 0.004032342:
+        z += 1836.969 * (0.08723651 - Q.sum_z_dr) * (0.004032342 - Q.C2_b2)
     if Q.centroid_offset < 0.02076709 and Q.tau21_b2 < 0.02656143:
         z += 3109.259 * (0.02076709 - Q.centroid_offset) * (0.02656143 - Q.tau21_b2)
     return max(0.0, z)
@@ -1183,28 +1183,28 @@ def neuron_7(Q):
 
 def neuron_8(Q):
     z = -0.4595087
-    if Q.girth2 < 0.001653836:
-        z += -194.0794 * Q.girth2 + 1.411125
-    if 0.001653836 <= Q.girth2 < 0.005019719:
-        z += -346.5569 * Q.girth2 + 1.663298
-    if 0.005019719 <= Q.girth2 < 0.006679471:
-        z += 45.98282 * Q.girth2 - 0.3071409
+    if Q.sum_z_dr2 < 0.001653836:
+        z += -194.0794 * Q.sum_z_dr2 + 1.411125
+    if 0.001653836 <= Q.sum_z_dr2 < 0.005019719:
+        z += -346.5569 * Q.sum_z_dr2 + 1.663298
+    if 0.005019719 <= Q.sum_z_dr2 < 0.006679471:
+        z += 45.98282 * Q.sum_z_dr2 - 0.3071409
     if Q.tau1 < 0.05356915:
         z += 12.07604 * Q.tau1 - 0.6469031
     if Q.LHA < 0.1967397:
         z += 37.98194 * Q.LHA - 7.472557
     if Q.log_sum_pt >= 6.701242:
         z += -11.01734 * Q.log_sum_pt + 73.82989
-    if Q.girth < 0.06108601:
-        z += 71.84133 * Q.girth - 4.388501
+    if Q.sum_z_dr < 0.06108601:
+        z += 71.84133 * Q.sum_z_dr - 4.388501
     if Q.sum_pt_top5 >= 687.4375:
         z += 0.005153167 * Q.sum_pt_top5 - 3.54248
     if Q.lam2 < 0.0001330621:
         z += 2844.916 * Q.lam2 - 0.3785504
     if Q.mass < 49.6681:
         z += 0.01513307 * Q.mass - 0.751631
-    if Q.width < 0.003562611:
-        z += -535.8749 * Q.width + 1.909114
+    if Q.lam1_plus_lam2 < 0.003562611:
+        z += -535.8749 * Q.lam1_plus_lam2 + 1.909114
     if Q.z_6 < 0.03448406:
         z += -18.49339 * Q.z_6 + 0.6377269
     if Q.mass_over_sum_pt < 0.03319429:
@@ -1213,28 +1213,28 @@ def neuron_8(Q):
         z += 15.2713 * Q.sj3_dr_max - 2.117859
     if 0.1426152 <= Q.sj3_dr_max < 0.1986272:
         z += -1.072267 * Q.sj3_dr_max + 0.2129815
-    if Q.girth2 < 0.006679471 and Q.D2_b2 < 4.721224:
-        z += -12.77938 * (0.006679471 - Q.girth2) * (4.721224 - Q.D2_b2)
-    if Q.girth2 < 0.006679471 and Q.centroid_offset < 0.02355416:
-        z += 16809.66 * (0.006679471 - Q.girth2) * (0.02355416 - Q.centroid_offset)
-    if Q.girth2 < 0.005019719 and Q.pt_7 < 43.5:
-        z += -6.776062 * (0.005019719 - Q.girth2) * (43.5 - Q.pt_7)
+    if Q.sum_z_dr2 < 0.006679471 and Q.D2_b2 < 4.721224:
+        z += -12.77938 * (0.006679471 - Q.sum_z_dr2) * (4.721224 - Q.D2_b2)
+    if Q.sum_z_dr2 < 0.006679471 and Q.centroid_offset < 0.02355416:
+        z += 16809.66 * (0.006679471 - Q.sum_z_dr2) * (0.02355416 - Q.centroid_offset)
+    if Q.sum_z_dr2 < 0.005019719 and Q.pt_7 < 43.5:
+        z += -6.776062 * (0.005019719 - Q.sum_z_dr2) * (43.5 - Q.pt_7)
     if Q.LHA < 0.1967397 and Q.mean_phi > -0.0008556753:
         z += 550.0564 * (0.1967397 - Q.LHA) * (Q.mean_phi - -0.0008556753)
-    if Q.girth2 < 0.006679471 and Q.phi_0 > -0.04013062:
-        z += 353.8733 * (0.006679471 - Q.girth2) * (Q.phi_0 - -0.04013062)
-    if Q.girth2 < 0.005019719 and Q.z_dr_0p2_0p4 < 0.1009734:
-        z += 6238.318 * (0.005019719 - Q.girth2) * (0.1009734 - Q.z_dr_0p2_0p4)
-    if Q.girth < 0.06108601 and Q.z_dr_0p2_0p4 < 0.05643852:
-        z += -183.8555 * (0.06108601 - Q.girth) * (0.05643852 - Q.z_dr_0p2_0p4)
+    if Q.sum_z_dr2 < 0.006679471 and Q.phi_0 > -0.04013062:
+        z += 353.8733 * (0.006679471 - Q.sum_z_dr2) * (Q.phi_0 - -0.04013062)
+    if Q.sum_z_dr2 < 0.005019719 and Q.z_dr_0p2_0p4 < 0.1009734:
+        z += 6238.318 * (0.005019719 - Q.sum_z_dr2) * (0.1009734 - Q.z_dr_0p2_0p4)
+    if Q.sum_z_dr < 0.06108601 and Q.z_dr_0p2_0p4 < 0.05643852:
+        z += -183.8555 * (0.06108601 - Q.sum_z_dr) * (0.05643852 - Q.z_dr_0p2_0p4)
     if Q.log_sum_pt > 6.701242 and Q.zdr_0 > 0.007798268:
         z += -91.40972 * (Q.log_sum_pt - 6.701242) * (Q.zdr_0 - 0.007798268)
     if Q.sum_pt_top5 > 687.4375 and Q.e3 < 3.10694e-07:
         z += 8109.469 * (Q.sum_pt_top5 - 687.4375) * (3.10694e-07 - Q.e3)
     if Q.mass < 29.6447 and Q.D2_b2 < 0.716559:
         z += -0.2568748 * (29.6447 - Q.mass) * (0.716559 - Q.D2_b2)
-    if Q.girth < 0.06108601 and Q.lam2 < 0.0001947983:
-        z += 140407.0 * (0.06108601 - Q.girth) * (0.0001947983 - Q.lam2)
+    if Q.sum_z_dr < 0.06108601 and Q.lam2 < 0.0001947983:
+        z += 140407.0 * (0.06108601 - Q.sum_z_dr) * (0.0001947983 - Q.lam2)
     if Q.lam2 < 0.0001330621 and Q.D2_b2 < 4.721224:
         z += 1684.945 * (0.0001330621 - Q.lam2) * (4.721224 - Q.D2_b2)
     if Q.tau1 < 0.05356915 and Q.D2_b2 < 4.721224:
@@ -1253,27 +1253,27 @@ def neuron_8(Q):
         z += 0.2804892 * (21.78408 - Q.mass) * (0.716559 - Q.D2_b2)
     if Q.sum_pt_top5 > 687.4375 and Q.n_pt_above_10 < 8.0:
         z += -0.0008376401 * (Q.sum_pt_top5 - 687.4375) * (8.0 - Q.n_pt_above_10)
-    if Q.girth2 < 0.005019719 and Q.centroid_offset > 0.006789738:
-        z += -26930.95 * (0.005019719 - Q.girth2) * (Q.centroid_offset - 0.006789738)
+    if Q.sum_z_dr2 < 0.005019719 and Q.centroid_offset > 0.006789738:
+        z += -26930.95 * (0.005019719 - Q.sum_z_dr2) * (Q.centroid_offset - 0.006789738)
     if Q.LHA < 0.1967397 and Q.pt_7 > 15.55391:
         z += 0.1632371 * (0.1967397 - Q.LHA) * (Q.pt_7 - 15.55391)
-    if Q.girth < 0.06108601 and Q.width > 0.0003193707:
-        z += 4155.522 * (0.06108601 - Q.girth) * (Q.width - 0.0003193707)
-    if Q.mass < 29.6447 and Q.width < 0.003562611:
-        z += -25.70359 * (29.6447 - Q.mass) * (0.003562611 - Q.width)
-    if Q.sj3_dr_max < 0.1986272 and Q.girth2 < 0.006679471:
-        z += 1252.217 * (0.1986272 - Q.sj3_dr_max) * (0.006679471 - Q.girth2)
-    if Q.tau1 < 0.05356915 and Q.width < 0.003562611:
-        z += 15483.85 * (0.05356915 - Q.tau1) * (0.003562611 - Q.width)
+    if Q.sum_z_dr < 0.06108601 and Q.lam1_plus_lam2 > 0.0003193707:
+        z += 4155.522 * (0.06108601 - Q.sum_z_dr) * (Q.lam1_plus_lam2 - 0.0003193707)
+    if Q.mass < 29.6447 and Q.lam1_plus_lam2 < 0.003562611:
+        z += -25.70359 * (29.6447 - Q.mass) * (0.003562611 - Q.lam1_plus_lam2)
+    if Q.sj3_dr_max < 0.1986272 and Q.sum_z_dr2 < 0.006679471:
+        z += 1252.217 * (0.1986272 - Q.sj3_dr_max) * (0.006679471 - Q.sum_z_dr2)
+    if Q.tau1 < 0.05356915 and Q.lam1_plus_lam2 < 0.003562611:
+        z += 15483.85 * (0.05356915 - Q.tau1) * (0.003562611 - Q.lam1_plus_lam2)
     return max(0.0, z)
 
 
 def neuron_9(Q):
     z = -1.921289
-    if Q.girth < 0.05464922:
-        z += 31.14545 * Q.girth - 1.702075
-    if Q.girth >= 0.0717028:
-        z += -17.89475 * Q.girth + 1.283104
+    if Q.sum_z_dr < 0.05464922:
+        z += 31.14545 * Q.sum_z_dr - 1.702075
+    if Q.sum_z_dr >= 0.0717028:
+        z += -17.89475 * Q.sum_z_dr + 1.283104
     if Q.tau1 < 0.04369778:
         z += -19.47037 * Q.tau1 + 0.8508121
     if Q.mass < 53.33237:
@@ -1284,10 +1284,10 @@ def neuron_9(Q):
         z += -4424.75 * Q.e3 + 0.3605173
     if Q.e3 >= 0.0001869378:
         z += -207.2295 * Q.e3 - 0.4278969
-    if Q.girth2 < 0.003562611:
-        z += -2825.783 * Q.girth2 + 13.72722
-    if 0.003562611 <= Q.girth2 < 0.00609665:
-        z += -1444.354 * Q.girth2 + 8.805718
+    if Q.sum_z_dr2 < 0.003562611:
+        z += -2825.783 * Q.sum_z_dr2 + 13.72722
+    if 0.003562611 <= Q.sum_z_dr2 < 0.00609665:
+        z += -1444.354 * Q.sum_z_dr2 + 8.805718
     if Q.sj3_dr_max < 0.1070199:
         z += 31.06659 * Q.sj3_dr_max - 2.574832
     if 0.1070199 <= Q.sj3_dr_max < 0.1426152:
@@ -1316,8 +1316,8 @@ def neuron_9(Q):
         z += 55.93993 * Q.e2 - 3.192554
     if Q.sj3_pair_mass_max < 24.23013:
         z += 0.08267852 * Q.sj3_pair_mass_max - 2.003311
-    if Q.width < 0.0001721983:
-        z += -6994.041 * Q.width + 1.204362
+    if Q.lam1_plus_lam2 < 0.0001721983:
+        z += -6994.041 * Q.lam1_plus_lam2 + 1.204362
     if Q.C3 < 0.0284695:
         z += 48.23023 * Q.C3 - 1.37309
     if Q.zdr_0 < 0.006292091:
@@ -1341,12 +1341,12 @@ def neuron_9(Q):
         z += 5.762122 * (53.33237 - Q.mass) * (0.02685622 - Q.centroid_offset)
     if Q.mass < 53.33237 and Q.log_sum_pt < 6.842717:
         z += 0.09287655 * (53.33237 - Q.mass) * (6.842717 - Q.log_sum_pt)
-    if Q.girth2 < 0.00609665 and Q.planar_flow < 0.3220738:
-        z += 1373.201 * (0.00609665 - Q.girth2) * (0.3220738 - Q.planar_flow)
-    if Q.girth2 < 0.00609665 and Q.mean_phi < 0.002834884:
-        z += -6931.86 * (0.00609665 - Q.girth2) * (0.002834884 - Q.mean_phi)
-    if Q.girth < 0.05464922 and Q.z_5 > 0.03672711:
-        z += -199.8666 * (0.05464922 - Q.girth) * (Q.z_5 - 0.03672711)
+    if Q.sum_z_dr2 < 0.00609665 and Q.planar_flow < 0.3220738:
+        z += 1373.201 * (0.00609665 - Q.sum_z_dr2) * (0.3220738 - Q.planar_flow)
+    if Q.sum_z_dr2 < 0.00609665 and Q.mean_phi < 0.002834884:
+        z += -6931.86 * (0.00609665 - Q.sum_z_dr2) * (0.002834884 - Q.mean_phi)
+    if Q.sum_z_dr < 0.05464922 and Q.z_5 > 0.03672711:
+        z += -199.8666 * (0.05464922 - Q.sum_z_dr) * (Q.z_5 - 0.03672711)
     if Q.lam1 > 0.005433361 and Q.eccentricity > 0.7117266:
         z += -610.973 * (Q.lam1 - 0.005433361) * (Q.eccentricity - 0.7117266)
     if Q.tau1 < 0.04369778 and Q.eccentricity > 0.9031255:
@@ -1363,8 +1363,8 @@ def neuron_9(Q):
         z += 4863.967 * (0.04369778 - Q.tau1) * (Q.mean_phi - 0.02612796)
     if Q.centroid_offset < 0.01837778 and Q.tau4 > 0.001224244:
         z += -8742.896 * (0.01837778 - Q.centroid_offset) * (Q.tau4 - 0.001224244)
-    if Q.girth2 < 0.00609665 and Q.mean_phi > 0.02612796:
-        z += -50929.31 * (0.00609665 - Q.girth2) * (Q.mean_phi - 0.02612796)
+    if Q.sum_z_dr2 < 0.00609665 and Q.mean_phi > 0.02612796:
+        z += -50929.31 * (0.00609665 - Q.sum_z_dr2) * (Q.mean_phi - 0.02612796)
     if Q.log_sum_pt > 6.896095 and Q.D2_b2 < 0.716559:
         z += -50.08579 * (Q.log_sum_pt - 6.896095) * (0.716559 - Q.D2_b2)
     if Q.centroid_offset < 0.01837778 and Q.n_for_90pct > 5.0:
@@ -1377,8 +1377,8 @@ def neuron_9(Q):
         z += 1005.68 * (0.01837778 - Q.centroid_offset) * (0.2055511 - Q.z_2nd)
     if Q.n_dr_0p2_0p4 > 1.0 and Q.sj3_dr_min < 0.2089872:
         z += -2.752444 * (Q.n_dr_0p2_0p4 - 1.0) * (0.2089872 - Q.sj3_dr_min)
-    if Q.girth < 0.05464922 and Q.tau21_b2 < 0.02656143:
-        z += 1931.66 * (0.05464922 - Q.girth) * (0.02656143 - Q.tau21_b2)
+    if Q.sum_z_dr < 0.05464922 and Q.tau21_b2 < 0.02656143:
+        z += 1931.66 * (0.05464922 - Q.sum_z_dr) * (0.02656143 - Q.tau21_b2)
     return max(0.0, z)
 
 
@@ -1420,14 +1420,14 @@ def neuron_10(Q):
         z += -26.40597 * Q.LHA + 8.009292
     if Q.tau1 >= 0.05356915:
         z += 22.51753 * Q.tau1 - 1.206245
-    if Q.girth2 < 0.002635418:
-        z += 273.4847 * Q.girth2 - 0.7207465
-    if Q.girth2 >= 0.007520088:
-        z += 463.6855 * Q.girth2 - 3.486956
+    if Q.sum_z_dr2 < 0.002635418:
+        z += 273.4847 * Q.sum_z_dr2 - 0.7207465
+    if Q.sum_z_dr2 >= 0.007520088:
+        z += 463.6855 * Q.sum_z_dr2 - 3.486956
     if Q.mass < 76.6557:
         z += -0.01399708 * Q.mass + 1.072956
-    if Q.girth2_top3 < 0.002151568:
-        z += -291.7416 * Q.girth2_top3 + 0.6277019
+    if Q.sum_z_dr2_top3 < 0.002151568:
+        z += -291.7416 * Q.sum_z_dr2_top3 + 0.6277019
     if Q.C2_b2 >= 0.009032972:
         z += 35.19322 * Q.C2_b2 - 0.3178994
     if Q.lam2 > 0.0003061234 and Q.sj3_pairmax_over_m > 0.6745796:
@@ -1465,10 +1465,10 @@ def neuron_11(Q):
         z += 4.30599 * Q.sj2_dr - 0.7659465
     if Q.sj2_dr >= 0.2687922:
         z += 18.67504 * Q.sj2_dr - 4.628235
-    if Q.girth2 < 0.004372139:
-        z += -259.6636 * Q.girth2 + 4.638364
-    if 0.004372139 <= Q.girth2 < 0.01323868:
-        z += -395.0899 * Q.girth2 + 5.230467
+    if Q.sum_z_dr2 < 0.004372139:
+        z += -259.6636 * Q.sum_z_dr2 + 4.638364
+    if 0.004372139 <= Q.sum_z_dr2 < 0.01323868:
+        z += -395.0899 * Q.sum_z_dr2 + 5.230467
     if Q.tau1 < 0.09538712:
         z += 20.27272 * Q.tau1 - 1.933756
     if Q.LHA < 0.3127275:
@@ -1495,14 +1495,14 @@ def neuron_11(Q):
         z += 28.58059 * Q.sj3_dr_max - 3.7767
     if 0.169029 <= Q.sj3_dr_max < 0.2623172:
         z += -11.301 * Q.sj3_dr_max + 2.964446
-    if Q.width < 0.008678045:
-        z += -1354.334 * Q.width + 11.75297
-    if Q.girth < 0.02054282:
-        z += 152.8198 * Q.girth - 5.469243
-    if 0.02054282 <= Q.girth < 0.0717028:
-        z += 45.54135 * Q.girth - 3.265442
-    if Q.e2_sq < 0.008168571:
-        z += 416.0058 * Q.e2_sq - 3.398173
+    if Q.lam1_plus_lam2 < 0.008678045:
+        z += -1354.334 * Q.lam1_plus_lam2 + 11.75297
+    if Q.sum_z_dr < 0.02054282:
+        z += 152.8198 * Q.sum_z_dr - 5.469243
+    if 0.02054282 <= Q.sum_z_dr < 0.0717028:
+        z += 45.54135 * Q.sum_z_dr - 3.265442
+    if Q.sum_zz_dr2 < 0.008168571:
+        z += 416.0058 * Q.sum_zz_dr2 - 3.398173
     if Q.z_7 >= 0.01685855:
         z += 25.31677 * Q.z_7 - 0.426804
     if Q.max_pair_mass >= 33.3761:
@@ -1544,29 +1544,29 @@ def neuron_11(Q):
 
 def neuron_12(Q):
     z = -0.712185
-    if Q.girth2 >= 0.01882765:
-        z += 378.6626 * Q.girth2 - 7.129328
+    if Q.sum_z_dr2 >= 0.01882765:
+        z += 378.6626 * Q.sum_z_dr2 - 7.129328
     if Q.mass >= 88.15578:
         z += 0.06103814 * Q.mass - 5.380865
     if Q.mass_over_sum_pt >= 0.1309286:
         z += -49.73314 * Q.mass_over_sum_pt + 6.511492
     if Q.zdr_0 >= 0.03981924:
         z += -25.42266 * Q.zdr_0 + 1.012311
-    if Q.girth2_top2 >= 0.01403324:
-        z += -30.70123 * Q.girth2_top2 + 0.4308378
-    if Q.girth2 > 0.01882765 and Q.lam2 > 0.000537286:
-        z += 4318.23 * (Q.girth2 - 0.01882765) * (Q.lam2 - 0.000537286)
-    if Q.girth2 > 0.01882765 and Q.pt_7 < 53.4375:
-        z += -2.20671 * (Q.girth2 - 0.01882765) * (53.4375 - Q.pt_7)
+    if Q.sum_z_dr2_top2 >= 0.01403324:
+        z += -30.70123 * Q.sum_z_dr2_top2 + 0.4308378
+    if Q.sum_z_dr2 > 0.01882765 and Q.lam2 > 0.000537286:
+        z += 4318.23 * (Q.sum_z_dr2 - 0.01882765) * (Q.lam2 - 0.000537286)
+    if Q.sum_z_dr2 > 0.01882765 and Q.pt_7 < 53.4375:
+        z += -2.20671 * (Q.sum_z_dr2 - 0.01882765) * (53.4375 - Q.pt_7)
     return max(0.0, z)
 
 
 def neuron_13(Q):
     z = 0.2941829
-    if Q.girth < 0.007673833:
-        z += 57.03125 * Q.girth + 8.1104
-    if 0.007673833 <= Q.girth < 0.1484084:
-        z += -60.73879 * Q.girth + 9.014148
+    if Q.sum_z_dr < 0.007673833:
+        z += 57.03125 * Q.sum_z_dr + 8.1104
+    if 0.007673833 <= Q.sum_z_dr < 0.1484084:
+        z += -60.73879 * Q.sum_z_dr + 9.014148
     if Q.lam1 < 0.006506576:
         z += -287.7079 * Q.lam1 + 3.185342
     if 0.006506576 <= Q.lam1 < 0.01643375:
@@ -1589,16 +1589,16 @@ def neuron_13(Q):
         z += -0.5500508 * Q.log_sum_pt + 3.57687
     if Q.pt_7 >= 48.71875:
         z += -0.04094033 * Q.pt_7 + 1.994561
-    if Q.width < 0.007520088:
-        z += 138.3813 * Q.width - 0.4954739
-    if 0.007520088 <= Q.width < 0.01323868:
-        z += -95.33222 * Q.width + 1.262072
+    if Q.lam1_plus_lam2 < 0.007520088:
+        z += 138.3813 * Q.lam1_plus_lam2 - 0.4954739
+    if 0.007520088 <= Q.lam1_plus_lam2 < 0.01323868:
+        z += -95.33222 * Q.lam1_plus_lam2 + 1.262072
     if Q.z_6 < 0.02160287:
         z += 149.1059 * Q.z_6 - 3.221116
-    if Q.girth < 0.1484084 and Q.log_sum_pt < 6.804164:
-        z += -68.13593 * (0.1484084 - Q.girth) * (6.804164 - Q.log_sum_pt)
-    if Q.girth < 0.1484084 and Q.pt_7 < 38.53125:
-        z += -0.9586129 * (0.1484084 - Q.girth) * (38.53125 - Q.pt_7)
+    if Q.sum_z_dr < 0.1484084 and Q.log_sum_pt < 6.804164:
+        z += -68.13593 * (0.1484084 - Q.sum_z_dr) * (6.804164 - Q.log_sum_pt)
+    if Q.sum_z_dr < 0.1484084 and Q.pt_7 < 38.53125:
+        z += -0.9586129 * (0.1484084 - Q.sum_z_dr) * (38.53125 - Q.pt_7)
     if Q.sum_pt_top5 > 658.125 and Q.z_7 > 0.02320757:
         z += -0.152491 * (Q.sum_pt_top5 - 658.125) * (Q.z_7 - 0.02320757)
     if Q.e3 < 5.334511e-05 and Q.centroid_offset < 0.03776099:
@@ -1607,18 +1607,18 @@ def neuron_13(Q):
         z += 0.0007050781 * (Q.sum_pt_top5 - 658.125) * (40.04062 - Q.pt_7)
     if Q.pt_6 < 31.90625 and Q.z_7 < 0.0586137:
         z += -3.317419 * (31.90625 - Q.pt_6) * (0.0586137 - Q.z_7)
-    if Q.girth < 0.1484084 and Q.z_7 > 0.06164517:
-        z += 376.2133 * (0.1484084 - Q.girth) * (Q.z_7 - 0.06164517)
-    if Q.girth < 0.1484084 and Q.lam2 < 0.000537286:
-        z += -9978.791 * (0.1484084 - Q.girth) * (0.000537286 - Q.lam2)
-    if Q.girth < 0.1484084 and Q.sj2_mass1 > 31.78116:
-        z += -1.784297 * (0.1484084 - Q.girth) * (Q.sj2_mass1 - 31.78116)
-    if Q.girth < 0.1484084 and Q.M3 < 0.07474969:
-        z += 154.833 * (0.1484084 - Q.girth) * (0.07474969 - Q.M3)
+    if Q.sum_z_dr < 0.1484084 and Q.z_7 > 0.06164517:
+        z += 376.2133 * (0.1484084 - Q.sum_z_dr) * (Q.z_7 - 0.06164517)
+    if Q.sum_z_dr < 0.1484084 and Q.lam2 < 0.000537286:
+        z += -9978.791 * (0.1484084 - Q.sum_z_dr) * (0.000537286 - Q.lam2)
+    if Q.sum_z_dr < 0.1484084 and Q.sj2_mass1 > 31.78116:
+        z += -1.784297 * (0.1484084 - Q.sum_z_dr) * (Q.sj2_mass1 - 31.78116)
+    if Q.sum_z_dr < 0.1484084 and Q.M3 < 0.07474969:
+        z += 154.833 * (0.1484084 - Q.sum_z_dr) * (0.07474969 - Q.M3)
     if Q.e3 < 5.334511e-05 and Q.D3 > 0.2213841:
         z += 1725.118 * (5.334511e-05 - Q.e3) * (Q.D3 - 0.2213841)
-    if Q.girth < 0.1484084 and Q.tau2 > 0.008780509:
-        z += 344.8033 * (0.1484084 - Q.girth) * (Q.tau2 - 0.008780509)
+    if Q.sum_z_dr < 0.1484084 and Q.tau2 > 0.008780509:
+        z += 344.8033 * (0.1484084 - Q.sum_z_dr) * (Q.tau2 - 0.008780509)
     if Q.mass > 49.6681 and Q.z_dr_0p1_0p2 < 0.4684459:
         z += -0.02255144 * (Q.mass - 49.6681) * (0.4684459 - Q.z_dr_0p1_0p2)
     if Q.log_sum_pt > 6.502799 and Q.zdr_7 > 0.0007928864:
@@ -1646,24 +1646,24 @@ def neuron_14(Q):
         z += 0.7981046 * Q.psi_0p1 - 0.7965033
     if Q.psi_0p1 >= 0.9761279:
         z += -15.80547 * Q.psi_0p1 + 15.41071
-    if 0.007520088 <= Q.girth2 < 0.008678045:
-        z += -781.1536 * Q.girth2 + 5.874344
-    if Q.girth2 >= 0.008678045:
-        z += -564.8674 * Q.girth2 + 3.997402
-    if 0.002074109 <= Q.e2_sq < 0.0030133:
-        z += 281.6466 * Q.e2_sq - 0.5841658
-    if 0.0030133 <= Q.e2_sq < 0.01165737:
-        z += 23.55524 * Q.e2_sq + 0.193541
-    if Q.e2_sq >= 0.01165737:
-        z += -266.267 * Q.e2_sq + 3.572107
-    if 0.003562611 <= Q.width < 0.005590289:
-        z += 317.4199 * Q.width - 1.130844
-    if 0.005590289 <= Q.width < 0.006679471:
-        z += 468.0139 * Q.width - 1.972708
-    if 0.006679471 <= Q.width < 0.01323868:
-        z += -987.0707 * Q.width + 7.746488
-    if Q.width >= 0.01323868:
-        z += -974.0257 * Q.width + 7.57379
+    if 0.007520088 <= Q.sum_z_dr2 < 0.008678045:
+        z += -781.1536 * Q.sum_z_dr2 + 5.874344
+    if Q.sum_z_dr2 >= 0.008678045:
+        z += -564.8674 * Q.sum_z_dr2 + 3.997402
+    if 0.002074109 <= Q.sum_zz_dr2 < 0.0030133:
+        z += 281.6466 * Q.sum_zz_dr2 - 0.5841658
+    if 0.0030133 <= Q.sum_zz_dr2 < 0.01165737:
+        z += 23.55524 * Q.sum_zz_dr2 + 0.193541
+    if Q.sum_zz_dr2 >= 0.01165737:
+        z += -266.267 * Q.sum_zz_dr2 + 3.572107
+    if 0.003562611 <= Q.lam1_plus_lam2 < 0.005590289:
+        z += 317.4199 * Q.lam1_plus_lam2 - 1.130844
+    if 0.005590289 <= Q.lam1_plus_lam2 < 0.006679471:
+        z += 468.0139 * Q.lam1_plus_lam2 - 1.972708
+    if 0.006679471 <= Q.lam1_plus_lam2 < 0.01323868:
+        z += -987.0707 * Q.lam1_plus_lam2 + 7.746488
+    if Q.lam1_plus_lam2 >= 0.01323868:
+        z += -974.0257 * Q.lam1_plus_lam2 + 7.57379
     if 0.01655442 <= Q.e2 < 0.03556091:
         z += -119.3339 * Q.e2 + 1.975504
     if 0.03556091 <= Q.e2 < 0.04110972:
@@ -1690,14 +1690,14 @@ def neuron_14(Q):
         z += -0.005773176 * Q.sd_mass - 0.4427915
     if 49.91626 <= Q.sd_mass < 74.57663:
         z += 0.02964136 * Q.sd_mass - 2.210553
-    if 0.02689598 <= Q.girth < 0.04081947:
-        z += 55.41953 * Q.girth - 1.490562
-    if 0.04081947 <= Q.girth < 0.08065885:
-        z += 98.97441 * Q.girth - 3.26845
-    if 0.08065885 <= Q.girth < 0.08723651:
-        z += 113.622 * Q.girth - 4.449911
-    if Q.girth >= 0.08723651:
-        z += -125.907 * Q.girth + 16.44577
+    if 0.02689598 <= Q.sum_z_dr < 0.04081947:
+        z += 55.41953 * Q.sum_z_dr - 1.490562
+    if 0.04081947 <= Q.sum_z_dr < 0.08065885:
+        z += 98.97441 * Q.sum_z_dr - 3.26845
+    if 0.08065885 <= Q.sum_z_dr < 0.08723651:
+        z += 113.622 * Q.sum_z_dr - 4.449911
+    if Q.sum_z_dr >= 0.08723651:
+        z += -125.907 * Q.sum_z_dr + 16.44577
     if Q.mass >= 69.61135:
         z += -0.0282684 * Q.mass + 1.967802
     if 0.06154135 <= Q.sj2_dr < 0.1294903:
@@ -1718,14 +1718,14 @@ def neuron_14(Q):
         z += -4934.999 * (0.1115136 - Q.planar_flow) * (0.00733008 - Q.lam1)
     if Q.planar_flow < 0.1115136 and Q.lam1 < 0.01643375:
         z += 1081.289 * (0.1115136 - Q.planar_flow) * (0.01643375 - Q.lam1)
-    if Q.planar_flow < 0.1115136 and Q.width < 0.00609665:
-        z += 3134.772 * (0.1115136 - Q.planar_flow) * (0.00609665 - Q.width)
+    if Q.planar_flow < 0.1115136 and Q.lam1_plus_lam2 < 0.00609665:
+        z += 3134.772 * (0.1115136 - Q.planar_flow) * (0.00609665 - Q.lam1_plus_lam2)
     if Q.planar_flow < 0.1115136 and Q.sum_pt_top5 < 658.125:
         z += -0.02305214 * (0.1115136 - Q.planar_flow) * (658.125 - Q.sum_pt_top5)
     if Q.planar_flow < 0.1115136 and Q.centroid_offset < 0.01837778:
         z += -480.9234 * (0.1115136 - Q.planar_flow) * (0.01837778 - Q.centroid_offset)
-    if Q.e2_sq > 0.002074109 and Q.sj2_dr < 0.1872617:
-        z += -4803.605 * (Q.e2_sq - 0.002074109) * (0.1872617 - Q.sj2_dr)
+    if Q.sum_zz_dr2 > 0.002074109 and Q.sj2_dr < 0.1872617:
+        z += -4803.605 * (Q.sum_zz_dr2 - 0.002074109) * (0.1872617 - Q.sj2_dr)
     if Q.z_dr_0p05_0p1 > 0.7509095 and Q.n_dr_0p2_0p4 < 1.0:
         z += 13.61807 * (Q.z_dr_0p05_0p1 - 0.7509095) * (1.0 - Q.n_dr_0p2_0p4)
     if Q.sd_mass < 74.57663 and Q.sj2_mass2 > 3.697444:
@@ -1741,46 +1741,46 @@ def neuron_15(Q):
     z = -0.3247903
     if Q.N2 < 0.2233283:
         z += 4.095983 * Q.N2 - 0.9147488
-    if Q.girth2 < 0.007520088:
-        z += 853.4423 * Q.girth2 - 6.417961
+    if Q.sum_z_dr2 < 0.007520088:
+        z += 853.4423 * Q.sum_z_dr2 - 6.417961
     if Q.mass_over_sum_pt < 0.1309286:
         z += 8.92072 * Q.mass_over_sum_pt - 1.167978
-    if Q.width < 0.00609665:
-        z += -147.4595 * Q.width + 7.136641
-    if 0.00609665 <= Q.width < 0.01323868:
-        z += -746.4086 * Q.width + 10.78822
-    if 0.01323868 <= Q.width < 0.01882765:
-        z += -162.2414 * Q.width + 3.054626
+    if Q.lam1_plus_lam2 < 0.00609665:
+        z += -147.4595 * Q.lam1_plus_lam2 + 7.136641
+    if 0.00609665 <= Q.lam1_plus_lam2 < 0.01323868:
+        z += -746.4086 * Q.lam1_plus_lam2 + 10.78822
+    if 0.01323868 <= Q.lam1_plus_lam2 < 0.01882765:
+        z += -162.2414 * Q.lam1_plus_lam2 + 3.054626
     if Q.e2 < 0.04110972:
         z += -147.9569 * Q.e2 + 5.781475
     if 0.04110972 <= Q.e2 < 0.06344108:
         z += 13.4784 * Q.e2 - 0.8550844
-    if Q.e2_sq < 0.008168571:
-        z += 864.2217 * Q.e2_sq - 7.928201
-    if 0.008168571 <= Q.e2_sq < 0.01165737:
-        z += 249.0093 * Q.e2_sq - 2.902794
+    if Q.sum_zz_dr2 < 0.008168571:
+        z += 864.2217 * Q.sum_zz_dr2 - 7.928201
+    if 0.008168571 <= Q.sum_zz_dr2 < 0.01165737:
+        z += 249.0093 * Q.sum_zz_dr2 - 2.902794
     if Q.mass_over_sum_pt_sq < 0.007182836:
         z += -655.3154 * Q.mass_over_sum_pt_sq + 4.707023
-    if Q.girth2_top3 < 0.002151568:
-        z += -167.3549 * Q.girth2_top3 + 1.492459
-    if 0.002151568 <= Q.girth2_top3 < 0.006756161:
-        z += -245.9248 * Q.girth2_top3 + 1.661507
+    if Q.sum_z_dr2_top3 < 0.002151568:
+        z += -167.3549 * Q.sum_z_dr2_top3 + 1.492459
+    if 0.002151568 <= Q.sum_z_dr2_top3 < 0.006756161:
+        z += -245.9248 * Q.sum_z_dr2_top3 + 1.661507
     if Q.lam1 < 0.002464291:
         z += 133.2625 * Q.lam1 - 0.7984595
     if 0.002464291 <= Q.lam1 < 0.005433361:
         z += -31.50479 * Q.lam1 - 0.3924248
     if 0.005433361 <= Q.lam1 < 0.008375572:
         z += 191.5572 * Q.lam1 - 1.604401
-    if Q.girth < 0.1019409:
-        z += 39.53508 * Q.girth - 4.030243
+    if Q.sum_z_dr < 0.1019409:
+        z += 39.53508 * Q.sum_z_dr - 4.030243
     if Q.sj2_dr < 0.1492731:
         z += -13.49486 * Q.sj2_dr + 1.043931
     if 0.1492731 <= Q.sj2_dr < 0.1591713:
         z += -25.20583 * Q.sj2_dr + 2.792063
     if 0.1591713 <= Q.sj2_dr < 0.2001708:
         z += 29.756 * Q.sj2_dr - 5.956283
-    if Q.girth2_top2 < 0.0005124533:
-        z += -3997.986 * Q.girth2_top2 + 2.048781
+    if Q.sum_z_dr2_top2 < 0.0005124533:
+        z += -3997.986 * Q.sum_z_dr2_top2 + 2.048781
     if Q.sj3_pair_mass_max >= 72.58129:
         z += -0.04377646 * Q.sj3_pair_mass_max + 3.177352
     if Q.lam2 < 0.0003061234:
@@ -1795,8 +1795,8 @@ def neuron_15(Q):
         z += -46.06171 * (0.2233283 - Q.N2) * (0.121681 - Q.max_dr)
     if Q.N2 < 0.2233283 and Q.sum_pt_top5 < 716.8828:
         z += 0.0176231 * (0.2233283 - Q.N2) * (716.8828 - Q.sum_pt_top5)
-    if Q.girth2 < 0.007520088 and Q.D2 < 0.7459513:
-        z += -1488.525 * (0.007520088 - Q.girth2) * (0.7459513 - Q.D2)
+    if Q.sum_z_dr2 < 0.007520088 and Q.D2 < 0.7459513:
+        z += -1488.525 * (0.007520088 - Q.sum_z_dr2) * (0.7459513 - Q.D2)
     if Q.mass_over_sum_pt < 0.1309286 and Q.D2 < 0.7459513:
         z += 71.52746 * (0.1309286 - Q.mass_over_sum_pt) * (0.7459513 - Q.D2)
     if Q.N2 < 0.2233283 and Q.n_dr_0p1_0p2 < 4.0:
@@ -1811,16 +1811,16 @@ def neuron_15(Q):
         z += -11827.28 * (0.001130645 - Q.lam2) * (Q.mean_phi - -0.01753483)
     if Q.e2 < 0.06344108 and Q.dr12 > 0.119512:
         z += 164.6886 * (0.06344108 - Q.e2) * (Q.dr12 - 0.119512)
-    if Q.width < 0.01882765 and Q.ptdr0_2 > 14.78048:
-        z += 6.090909 * (0.01882765 - Q.width) * (Q.ptdr0_2 - 14.78048)
+    if Q.lam1_plus_lam2 < 0.01882765 and Q.ptdr0_2 > 14.78048:
+        z += 6.090909 * (0.01882765 - Q.lam1_plus_lam2) * (Q.ptdr0_2 - 14.78048)
     if Q.centroid_offset < 0.01837778 and Q.dr01 < 0.2512159:
         z += -284.3173 * (0.01837778 - Q.centroid_offset) * (0.2512159 - Q.dr01)
     if Q.centroid_offset < 0.01837778 and Q.zdr_0 < 0.01216943:
         z += -15778.85 * (0.01837778 - Q.centroid_offset) * (0.01216943 - Q.zdr_0)
     if Q.mass_over_sum_pt_sq < 0.007182836 and Q.D2 < 0.7459513:
         z += -1195.414 * (0.007182836 - Q.mass_over_sum_pt_sq) * (0.7459513 - Q.D2)
-    if Q.width < 0.00609665 and Q.D2_b2 < 0.08499387:
-        z += -2496.694 * (0.00609665 - Q.width) * (0.08499387 - Q.D2_b2)
+    if Q.lam1_plus_lam2 < 0.00609665 and Q.D2_b2 < 0.08499387:
+        z += -2496.694 * (0.00609665 - Q.lam1_plus_lam2) * (0.08499387 - Q.D2_b2)
     return max(0.0, z)
 
 
