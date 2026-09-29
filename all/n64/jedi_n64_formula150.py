@@ -43,7 +43,7 @@ Quantities:
   Q.z_top2_slots           pT share of the 2 hardest particles
   Q.z_top30_slots          pT share of the 30 hardest particles
   Q.z_top50_slots          pT share of the 50 hardest particles
-  Q.zdr_0                  pT share × ΔR of particle 0 (its part of the girth)
+  Q.zdr_0                  pT share × ΔR of particle 0 (its part of the sum_z_dr)
   Q.planar_flow            planar flow of the pT-weighted (Δη, Δφ) tensor
   Q.sj3_pair_mass_min      smallest mass of two of the 3 subjets [GeV]
   Q.sj3_dr_min             smallest distance among the 3 subjet axes
@@ -59,20 +59,20 @@ Quantities:
   Q.sum_pt_top30           total pT of the 30 hardest particles [GeV]
   Q.sum_pt_top40           total pT of the 40 hardest particles [GeV]
   Q.sum_pt_top50           total pT of the 50 hardest particles [GeV]
-  Q.girth2_top10           pT-weighted mean ΔR² of the 10 hardest particles
-  Q.girth2_top15           pT-weighted mean ΔR² of the 15 hardest particles
-  Q.girth2_top20           pT-weighted mean ΔR² of the 20 hardest particles
-  Q.girth2_top3            pT-weighted mean ΔR² of the 3 hardest particles
-  Q.girth2_top30           pT-weighted mean ΔR² of the 30 hardest particles
-  Q.girth2_top40           pT-weighted mean ΔR² of the 40 hardest particles
-  Q.girth2_top5            pT-weighted mean ΔR² of the 5 hardest particles
+  Q.sum_z_dr2_top10           pT-weighted mean ΔR² of the 10 hardest particles
+  Q.sum_z_dr2_top15           pT-weighted mean ΔR² of the 15 hardest particles
+  Q.sum_z_dr2_top20           pT-weighted mean ΔR² of the 20 hardest particles
+  Q.sum_z_dr2_top3            pT-weighted mean ΔR² of the 3 hardest particles
+  Q.sum_z_dr2_top30           pT-weighted mean ΔR² of the 30 hardest particles
+  Q.sum_z_dr2_top40           pT-weighted mean ΔR² of the 40 hardest particles
+  Q.sum_z_dr2_top5            pT-weighted mean ΔR² of the 5 hardest particles
   Q.n_dr_0p2_0p4           number of particles with 0.2 ≤ ΔR < 0.4
   Q.sum_pt                 total pT of the particles [GeV]
   Q.z_dr_0_0p05            pT share of the particles with 0 ≤ ΔR < 0.05
   Q.z_dr_0p1_0p2           pT share of the particles with 0.1 ≤ ΔR < 0.2
   Q.z_dr_0p2_0p4           pT share of the particles with 0.2 ≤ ΔR < 0.4
   Q.e2                     energy correlation e2 = Σ_{i<j} zᵢzⱼΔRᵢⱼ
-  Q.e2_sq                  Σ_{i<j} zᵢzⱼΔRᵢⱼ²
+  Q.sum_zz_dr2                  Σ_{i<j} zᵢzⱼΔRᵢⱼ²
   Q.psi_0p2                pT share within ΔR < 0.2 of the jet axis
   Q.psi_0p3                pT share within ΔR < 0.3 of the jet axis
   Q.lam1                   larger eigenvalue of the pT-weighted (Δη, Δφ) tensor
@@ -309,20 +309,20 @@ def quantities(pt, eta, phi):
         sum_pt_top30=sum(pt[:30]),
         sum_pt_top40=sum(pt[:40]),
         sum_pt_top50=sum(pt[:50]),
-        girth2_top10=sum(pt[i] * dr[i] ** 2 for i in range(10)) / max(sum(pt[:10]), 1e-9),
-        girth2_top15=sum(pt[i] * dr[i] ** 2 for i in range(15)) / max(sum(pt[:15]), 1e-9),
-        girth2_top20=sum(pt[i] * dr[i] ** 2 for i in range(20)) / max(sum(pt[:20]), 1e-9),
-        girth2_top3=sum(pt[i] * dr[i] ** 2 for i in range(3)) / max(sum(pt[:3]), 1e-9),
-        girth2_top30=sum(pt[i] * dr[i] ** 2 for i in range(30)) / max(sum(pt[:30]), 1e-9),
-        girth2_top40=sum(pt[i] * dr[i] ** 2 for i in range(40)) / max(sum(pt[:40]), 1e-9),
-        girth2_top5=sum(pt[i] * dr[i] ** 2 for i in range(5)) / max(sum(pt[:5]), 1e-9),
+        sum_z_dr2_top10=sum(pt[i] * dr[i] ** 2 for i in range(10)) / max(sum(pt[:10]), 1e-9),
+        sum_z_dr2_top15=sum(pt[i] * dr[i] ** 2 for i in range(15)) / max(sum(pt[:15]), 1e-9),
+        sum_z_dr2_top20=sum(pt[i] * dr[i] ** 2 for i in range(20)) / max(sum(pt[:20]), 1e-9),
+        sum_z_dr2_top3=sum(pt[i] * dr[i] ** 2 for i in range(3)) / max(sum(pt[:3]), 1e-9),
+        sum_z_dr2_top30=sum(pt[i] * dr[i] ** 2 for i in range(30)) / max(sum(pt[:30]), 1e-9),
+        sum_z_dr2_top40=sum(pt[i] * dr[i] ** 2 for i in range(40)) / max(sum(pt[:40]), 1e-9),
+        sum_z_dr2_top5=sum(pt[i] * dr[i] ** 2 for i in range(5)) / max(sum(pt[:5]), 1e-9),
         n_dr_0p2_0p4=sum(1 for i in real if 0.2 <= dr[i] < 0.4),
         sum_pt=tot,
         z_dr_0_0p05=sum(z[i] for i in real if 0 <= dr[i] < 0.05),
         z_dr_0p1_0p2=sum(z[i] for i in real if 0.1 <= dr[i] < 0.2),
         z_dr_0p2_0p4=sum(z[i] for i in real if 0.2 <= dr[i] < 0.4),
         e2=e2,
-        e2_sq=sum(z[i] * z[j] * dist2(i, j) for i in P for j in P if i < j),
+        sum_zz_dr2=sum(z[i] * z[j] * dist2(i, j) for i in P for j in P if i < j),
         psi_0p2=sum(z[i] for i in real if dr[i] < 0.2),
         psi_0p3=sum(z[i] for i in real if dr[i] < 0.3),
         lam1=lam1,
@@ -337,10 +337,10 @@ def quantities(pt, eta, phi):
 
 def neuron_0(Q):
     z = 1.58
-    if Q.e2_sq < 0.00614:
-        z += 662.0 * Q.e2_sq - 4.06468
-    if Q.girth2_top20 < 0.00639:
-        z += 204.0 * Q.girth2_top20 - 1.30356
+    if Q.sum_zz_dr2 < 0.00614:
+        z += 662.0 * Q.sum_zz_dr2 - 4.06468
+    if Q.sum_z_dr2_top20 < 0.00639:
+        z += 204.0 * Q.sum_z_dr2_top20 - 1.30356
     if 78.9 <= Q.mass < 88.9:
         z += -0.161 * Q.mass + 12.7029
     if Q.mass >= 88.9:
@@ -364,8 +364,8 @@ def neuron_1(Q):
     z = 3.08
     if Q.M3 < 0.0312:
         z += 46.1 * Q.M3 - 1.43832
-    if Q.girth2_top3 < 0.000549:
-        z += -1590.0 * Q.girth2_top3 + 0.87291
+    if Q.sum_z_dr2_top3 < 0.000549:
+        z += -1590.0 * Q.sum_z_dr2_top3 + 0.87291
     if Q.log_sum_pt < 6.9:
         z += 10.9 * Q.log_sum_pt - 78.044
     if 6.9 <= Q.log_sum_pt < 6.99:
@@ -401,8 +401,8 @@ def neuron_1(Q):
 
 def neuron_2(Q):
     z = 0.0765
-    if Q.log_sum_pt > 6.93 and Q.girth2_top15 < 0.0271:
-        z += 200.0 * (Q.log_sum_pt - 6.93) * (0.0271 - Q.girth2_top15)
+    if Q.log_sum_pt > 6.93 and Q.sum_z_dr2_top15 < 0.0271:
+        z += 200.0 * (Q.log_sum_pt - 6.93) * (0.0271 - Q.sum_z_dr2_top15)
     if Q.sum_pt_top20 > 1130.0 and Q.eta_1 > 0.0866:
         z += -6.94 * (Q.sum_pt_top20 - 1130.0) * (Q.eta_1 - 0.0866)
     return max(0.0, z)
@@ -429,8 +429,8 @@ def neuron_3(Q):
 
 def neuron_4(Q):
     z = 1.01
-    if Q.girth2_top15 < 0.00506:
-        z += 171.0 * Q.girth2_top15 - 0.86526
+    if Q.sum_z_dr2_top15 < 0.00506:
+        z += 171.0 * Q.sum_z_dr2_top15 - 0.86526
     if Q.mass < 73.7:
         z += 0.0415 * Q.mass - 3.02446
     if 73.7 <= Q.mass < 78.2:
@@ -450,8 +450,8 @@ def neuron_4(Q):
 
 def neuron_5(Q):
     z = 0.0908
-    if Q.girth2_top30 >= 0.00755:
-        z += -180.0 * Q.girth2_top30 + 1.359
+    if Q.sum_z_dr2_top30 >= 0.00755:
+        z += -180.0 * Q.sum_z_dr2_top30 + 1.359
     if Q.log_sum_pt >= 6.91:
         z += -26.0 * Q.log_sum_pt + 179.66
     if Q.mass >= 70.6:
@@ -481,8 +481,8 @@ def neuron_6(Q):
         z += -36.6 * Q.LHA + 13.542
     if Q.e2 >= 0.0274:
         z += -34.4 * Q.e2 + 0.94256
-    if Q.girth2_top20 >= 0.00754:
-        z += 286.0 * Q.girth2_top20 - 2.15644
+    if Q.sum_z_dr2_top20 >= 0.00754:
+        z += 286.0 * Q.sum_z_dr2_top20 - 2.15644
     if Q.mass < 92.6:
         z += 0.01 * Q.mass - 2.1272
     if 92.6 <= Q.mass < 101.0:
@@ -495,8 +495,8 @@ def neuron_6(Q):
         z += -12.2 * Q.sj3_dr_min + 1.4518
     if Q.e2 > 0.0572 and Q.zdr_0 > 0.00437:
         z += 3630.0 * (Q.e2 - 0.0572) * (Q.zdr_0 - 0.00437)
-    if Q.girth2_top20 > 0.00729 and Q.C2_b2 > -0.000102:
-        z += -6610.0 * (Q.girth2_top20 - 0.00729) * (Q.C2_b2 - -0.000102)
+    if Q.sum_z_dr2_top20 > 0.00729 and Q.C2_b2 > -0.000102:
+        z += -6610.0 * (Q.sum_z_dr2_top20 - 0.00729) * (Q.C2_b2 - -0.000102)
     if Q.sj3_dr_min > 0.112 and Q.sj3_mass2 < 7.8:
         z += 2.21 * (Q.sj3_dr_min - 0.112) * (7.8 - Q.sj3_mass2)
     return max(0.0, z)
@@ -550,8 +550,8 @@ def neuron_8(Q):
 
 def neuron_9(Q):
     z = 1.28
-    if Q.girth2_top40 < 0.00598:
-        z += -343.0 * Q.girth2_top40 + 2.05114
+    if Q.sum_z_dr2_top40 < 0.00598:
+        z += -343.0 * Q.sum_z_dr2_top40 + 2.05114
     if Q.mass < 64.7:
         z += -0.0033 * Q.mass + 0.36347
     if 64.7 <= Q.mass < 85.1:
@@ -607,8 +607,8 @@ def neuron_10(Q):
         z += -6.18 * Q.z_top2_slots + 1.90506
     if Q.z_top2_slots >= 0.319:
         z += -3.16 * Q.z_top2_slots + 0.94168
-    if Q.girth2_top10 < 0.0201 and Q.psi_0p3 > 0.998:
-        z += -16500.0 * (0.0201 - Q.girth2_top10) * (Q.psi_0p3 - 0.998)
+    if Q.sum_z_dr2_top10 < 0.0201 and Q.psi_0p3 > 0.998:
+        z += -16500.0 * (0.0201 - Q.sum_z_dr2_top10) * (Q.psi_0p3 - 0.998)
     return max(0.0, z)
 
 
@@ -675,8 +675,8 @@ def neuron_13(Q):
 
 def neuron_14(Q):
     z = -0.714
-    if Q.girth2_top5 < 0.006:
-        z += -76.3 * Q.girth2_top5 + 0.4578
+    if Q.sum_z_dr2_top5 < 0.006:
+        z += -76.3 * Q.sum_z_dr2_top5 + 0.4578
     if Q.log_sum_pt < 6.94:
         z += -20.0 * Q.log_sum_pt + 138.8
     if Q.mass < 82.7:
@@ -697,15 +697,15 @@ def neuron_14(Q):
         z += -8.51 * (0.455 - Q.N2) * (Q.max_dr - 0.244)
     if Q.psi_0p3 > 0.993 and Q.sd_rg < 0.235:
         z += -676.0 * (Q.psi_0p3 - 0.993) * (0.235 - Q.sd_rg)
-    if Q.tau21_b2 < 0.331 and Q.girth2_top40 < 0.00769:
-        z += -1470.0 * (0.331 - Q.tau21_b2) * (0.00769 - Q.girth2_top40)
+    if Q.tau21_b2 < 0.331 and Q.sum_z_dr2_top40 < 0.00769:
+        z += -1470.0 * (0.331 - Q.tau21_b2) * (0.00769 - Q.sum_z_dr2_top40)
     return max(0.0, z)
 
 
 def neuron_15(Q):
     z = -0.268
-    if Q.girth2_top10 < 0.0102:
-        z += -151.0 * Q.girth2_top10 + 1.5402
+    if Q.sum_z_dr2_top10 < 0.0102:
+        z += -151.0 * Q.sum_z_dr2_top10 + 1.5402
     if Q.psi_0p3 >= 0.989:
         z += -57.5 * Q.psi_0p3 + 56.8675
     if Q.tau1 < 0.0674:
