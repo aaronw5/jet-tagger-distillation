@@ -1,13 +1,13 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Distilling a Jet-Tagging Network into Physics Rules</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>From Neurons to Observables: Physics Equations for the Last Hidden Layer of a Jet Tagger</title>
 <style>:root{--ink:#1d2433;--mut:#667085;--line:#e4e7ec;--bg:#f7f8fa;--acc:#1f4e79}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:820px;margin:0 auto;padding:40px 16px 60px}
 h1{margin:0 0 4px;font-size:30px}.cnt{color:var(--mut);font-size:14px}a.card{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0;text-decoration:none;color:inherit}
 a.card:hover{border-color:var(--acc)}.k{display:inline-block;margin:6px 18px 0 0}.k b{display:block;font-size:22px;color:var(--acc)}code{font-size:13px}</style></head><body><main>
-<h1 style="font-size:26px">Distilling a Jet-Tagging Network into Physics Rules</h1><div class="cnt">The JEDI-linear jet tagger, translated into if-statements.</div>
+<h1 style="font-size:26px">From Neurons to Observables: Physics Equations for the Last Hidden Layer of a Jet Tagger</h1><div class="cnt">The JEDI-linear jet tagger, translated into if-statements.</div>
 <p>A small neural network sorts particle jets into five kinds: gluon (g), light quark (q), W boson, Z boson and top quark (t). It makes its decision from 16 numbers, its last hidden layer (“jet layer 4”).
 Here each of those 16 numbers is rewritten as a sum of plain if-statements on physics quantities of the jet (mass, width, how the momentum is shared among the particles, …), for example
 <code>if mass &lt; 29.64: z -= 0.395 × (29.64 − mass)</code> (neuron 0 of the 624-if-statement formula for 8 particles). The formulas are tuned so that the network’s own last step, fed with them, makes the same decisions as the network.</p>
-<p>Each page shows how close the formulas come, what every one of the 16 numbers measures and how the class scores use it, a jet you can try, trees that follow the formula, and every formula as a runnable Python file.</p>
+<p>Each page shows how close the formulas come, what every one of the 16 numbers measures and how the class scores use it, a jet you can try, and every formula as a runnable Python file.</p>
 <a class="card" href="n8/index.html"><b>8 particles per jet</b><div><span class="k"><b>90.3%</b><span class="cnt">same class as the network</span></span><span class="k"><b>65.52%</b><span class="cnt">accuracy (network 65.69%)</span></span><span class="k"><b>624</b><span class="cnt">if-statements in all</span></span></div></a>
 <a class="card" href="n64/index.html"><b>64 particles per jet</b><div><span class="k"><b>93.9%</b><span class="cnt">same class as the network</span></span><span class="k"><b>81.12%</b><span class="cnt">accuracy (network 80.94%)</span></span><span class="k"><b>590</b><span class="cnt">if-statements in all</span></span></div></a>
 <p class="cnt">Model: JEDI-linear (github.com/calad0i/JEDI-linear). Numbers on the whole test file; “same class as the network” = share of test jets on which the formula gives the network’s answer.</p>
